@@ -9,6 +9,9 @@ node_modules/
 dist/
 .vite/
 
+# Logs / Misc
+*.log
+
 # IDE
 .idea/
 .DS_Store
