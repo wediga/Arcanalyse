@@ -1,0 +1,14 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node (für das spätere Frontend)
+node_modules/
+dist/
+.vite/
+
+# IDE
+.idea/
+.DS_Store
