@@ -2,20 +2,21 @@ name: CI
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: ["main", "master"]
+    branches: [ "main", "master" ]
 
 jobs:
   backend:
     name: Backend (lint, typecheck, tests, openapi)
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
+        id: py
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -23,9 +24,16 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v2
 
-      - name: Install backend deps (CI)
+      - name: Cache backend venv
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-py${{ steps.py.outputs.python-version }}-${{ hashFiles('backend/requirements-ci.txt') }}
+
+      - name: Create venv & install deps
         run: |
           cd backend
+          uv venv --python=${{ steps.py.outputs.python-version }}
           uv pip install -r requirements-ci.txt
 
       - name: Ruff (lint)
@@ -43,10 +51,10 @@ jobs:
           cd backend
           uv run pytest tests -q
 
-      - name: Generate OpenAPI JSON (artifact)
+      - name: Generate OpenAPI JSON
         run: |
           cd backend
-          uv run python -c "import json; from app.main import create_app; print(json.dumps(create_app().openapi()))" > ..\backend_openapi.json
+          uv run python -c "import json; from app.main import create_app; print(json.dumps(create_app().openapi()))" > ../backend_openapi.json
 
       - name: Upload OpenAPI artifact
         uses: actions/upload-artifact@v4
@@ -56,7 +64,7 @@ jobs:
 
   frontend:
     name: Frontend (types, tests)
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: backend
 
     steps:
@@ -81,10 +89,10 @@ jobs:
           name: openapi
           path: frontend
 
-      - name: Generate API types from OpenAPI file
+      - name: Generate API types
         run: |
           cd frontend
-          npx openapi-typescript .\backend_openapi.json -o .\src\shared\types\api.d.ts --export-type
+          npx --yes openapi-typescript ./backend_openapi.json -o ./src/shared/types/api.d.ts --export-type
 
       - name: Vitest (frontend)
         run: |
