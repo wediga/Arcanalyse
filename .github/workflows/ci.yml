@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
 
 jobs:
   backend:
@@ -24,37 +24,43 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v2
 
-      - name: Cache backend venv
+      # Wir cachen die venv am Repo-Root (.venv), weil uv sie dort anlegt
+      - name: Cache venv
         uses: actions/cache@v4
         with:
-          path: backend/.venv
+          path: .venv
           key: venv-${{ runner.os }}-py${{ steps.py.outputs.python-version }}-${{ hashFiles('backend/requirements-ci.txt') }}
 
       - name: Create venv & install deps
         run: |
-          cd backend
           uv venv --python=${{ steps.py.outputs.python-version }}
-          uv pip install -r requirements-ci.txt
+          uv pip install -r backend/requirements-ci.txt
 
       - name: Ruff (lint)
-        run: |
-          cd backend
-          uv run ruff check .
+        working-directory: backend
+        run: uv run python -m ruff check .
 
       - name: Mypy (typecheck)
-        run: |
-          cd backend
-          uv run mypy .
+        working-directory: backend
+        run: uv run python -m mypy .
 
       - name: Pytest (backend)
-        run: |
-          cd backend
-          uv run pytest tests -q
+        working-directory: backend
+        run: uv run python -m pytest tests -q
 
       - name: Generate OpenAPI JSON
-        run: |
-          cd backend
-          uv run python -c "import json; from app.main import create_app; print(json.dumps(create_app().openapi()))" > ../backend_openapi.json
+        working-directory: backend
+        run: uv run python - << 'PY'
+              import json
+              from app.main import create_app
+              print(json.dumps(create_app().openapi()))
+                PY
+        shell: bash
+      - name: Move OpenAPI to repo root
+        run: mv backend/.env backend/.env || true && mv backend_openapi.json backend_openapi.json 2>/dev/null || true
+        shell: bash
+      # Die vorherige Step-Variante mit "python -c" erzeugt die Datei direkt:
+      # uv run python -c "import json; from app.main import create_app; print(json.dumps(create_app().openapi()))" > ../backend_openapi.json
 
       - name: Upload OpenAPI artifact
         uses: actions/upload-artifact@v4
@@ -79,9 +85,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install FE deps
-        run: |
-          cd frontend
-          npm ci
+        working-directory: frontend
+        run: npm ci
 
       - name: Download OpenAPI artifact
         uses: actions/download-artifact@v4
@@ -89,12 +94,10 @@ jobs:
           name: openapi
           path: frontend
 
-      - name: Generate API types
-        run: |
-          cd frontend
-          npx --yes openapi-typescript ./backend_openapi.json -o ./src/shared/types/api.d.ts --export-type
+      - name: Generate API types from OpenAPI
+        working-directory: frontend
+        run: npx --yes openapi-typescript ./backend_openapi.json -o ./src/shared/types/api.d.ts --export-type
 
       - name: Vitest (frontend)
-        run: |
-          cd frontend
-          npm run test:run
+        working-directory: frontend
+        run: npm run test:run
