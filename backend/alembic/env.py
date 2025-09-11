@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -9,6 +10,7 @@ from alembic import context
 from sqlalchemy import MetaData, pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlmodel import SQLModel
 
 # Make 'app' importable when running alembic from backend/
 BASE_DIR = Path(__file__).resolve().parents[1]  # backend/
@@ -27,16 +29,26 @@ if config.config_file_name is not None:
 # Target metadata placeholder (set to SQLModel.metadata once models exist)
 # from sqlmodel import SQLModel
 # target_metadata = SQLModel.metadata
-target_metadata: MetaData | None = None
+target_metadata: MetaData | None = SQLModel.metadata
+
+
+def _import_all_model_modules() -> None:
+    models_dir = BASE_DIR / "app" / "models"
+    if not models_dir.exists():
+        return
+    for py in models_dir.glob("*.py"):
+        if py.name.startswith("_"):
+            continue
+        importlib.import_module(f"app.models.{py.stem}")
 
 
 def get_url() -> str:
-    s = get_settings()
-    return s.database_url
+    return get_settings().database_url
 
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
+    _import_all_model_modules()
     url = get_url()
     context.configure(
         url=url,
@@ -51,6 +63,7 @@ def run_migrations_offline() -> None:
 
 def do_run_migrations(connection: Connection) -> None:
     """Configure context and run migrations with a given connection."""
+    _import_all_model_modules()
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
