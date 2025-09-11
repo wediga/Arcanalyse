@@ -67,3 +67,9 @@ migrate-status-test:
 
 migrate-up-test:
     Push-Location {{backend_dir}}; $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_dev:arcanalyse_dev@localhost:5432/arcanalyse_test"; uv run alembic upgrade head; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+pre-commit-install:
+    uv run pre-commit install
+
+pre-commit:
+    uv run pre-commit run --all-files
