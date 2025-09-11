@@ -35,6 +35,8 @@ frontend/.vite/
 frontend/.eslintcache
 frontend/coverage/
 frontend/.cache/
+frontend//package.json
+frontend/package-lock.json
 
 # Generierte API-Typen & Artefakte
 frontend/src/shared/types/api.d.ts

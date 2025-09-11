@@ -1,0 +1,43 @@
+[project]
+name = "arcanalyse"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = []
+
+# Zentraler Ort für Tooling-Konfiguration (keine Python-Package-Definition nötig)
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+preview = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# Minimal, aber sinnvoll: PEP8/Flake (E/F/W), Imports (I), Bugbear (B), pyupgrade (UP)
+select = ["E", "F", "W", "I", "B", "UP"]
+# Keine globalen Ignores – wir halten es streng und sauber
+
+[tool.ruff.lint.isort]
+known-first-party = ["backend"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_return_any = true
+pretty = true
+show_error_codes = true
+# Pydantic-Plugin fügen wir hinzu, sobald Pydantic installiert ist (in Schritt 4)
+
+[tool.pytest.ini_options]
+addopts = "-vv -rA --color=yes"
+testpaths = ["backend/tests"]
+asyncio_mode = "strict"

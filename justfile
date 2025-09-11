@@ -1,33 +1,69 @@
-# Use PowerShell as shell on Windows
+# PowerShell als Shell (If/Else, $LASTEXITCODE etc.)
 set shell := ["powershell", "-NoProfile", "-Command"]
 
-# Common paths (kept simple for portability)
-ROOT := "."
-BACKEND_DIR := "backend"
-FRONTEND_DIR := "frontend"
+# Pfade
+backend_dir := "backend"
+frontend_dir := "frontend"
 
-# Default target: show available recipes
+# --------------------------------------------------------------------
+# Übersicht
 default:
     @just --list
 
-# Placeholder recipes — will be implemented in later steps
+# --------------------------------------------------------------------
+# Setup & Dev-Server
 setup:
-    echo "Setup steps will be added in step 3 (Python tooling) and step 8 (Frontend)."
+    Write-Host "Installing frontend deps..."; Push-Location {{frontend_dir}}; npm install; $fe=$LASTEXITCODE; Pop-Location; if ($fe -ne 0) { exit $fe } else { Write-Host "Frontend deps OK"; }; Write-Host "Python deps were installed earlier via 'uv pip install ...'."
+
+fe-install:
+    Push-Location {{frontend_dir}}; npm install; $code=$LASTEXITCODE; Pop-Location; exit $code
 
 backend:
-    echo "Backend run command will be added in step 4 (FastAPI skeleton)."
+    Push-Location {{backend_dir}}; uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000; $code=$LASTEXITCODE; Pop-Location; exit $code
 
 frontend:
-    echo "Frontend run command will be added in step 8 (Vite)."
+    Push-Location {{frontend_dir}}; npm run dev -- --open --host; $code=$LASTEXITCODE; Pop-Location; exit $code
 
-test:be:
-    echo "Backend tests will be wired in step 7."
+# --------------------------------------------------------------------
+# Qualität
+lint:
+    if ((Get-ChildItem -Path {{backend_dir}} -Recurse -Include *.py -File -ErrorAction SilentlyContinue)) { uv run ruff check {{backend_dir}}; exit $LASTEXITCODE } else { Write-Host "No Python files found in '{{backend_dir}}'. Skipping lint."; exit 0 }
 
-test:fe:
-    echo "Frontend tests will be wired in step 10."
+format:
+    uv run black .
 
-gen:api:
-    echo "OpenAPI type generation will be configured in step 9."
+typecheck:
+    if ((Get-ChildItem -Path {{backend_dir}} -Recurse -Include *.py -File -ErrorAction SilentlyContinue)) { uv run mypy {{backend_dir}}; exit $LASTEXITCODE } else { Write-Host "No Python files found in '{{backend_dir}}'. Skipping typecheck."; exit 0 }
 
-migrate:
-    echo "Alembic migrations will be wired in step 5."
+# --------------------------------------------------------------------
+# Tests
+test-be:
+    Push-Location backend; if (!(Test-Path "tests")) { Write-Host "No tests directory at 'backend\\tests'. Skipping."; Pop-Location; exit 0 }; $tf = Get-ChildItem -Path "tests" -Recurse -Include *.py -File -ErrorAction SilentlyContinue; if (!$tf) { Write-Host "No test files found in 'backend\\tests'. Skipping."; Pop-Location; exit 0 }; uv run pytest tests; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+test-fe:
+    Push-Location {{frontend_dir}}; npm run test:run; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+test-fe-watch:
+    Push-Location {{frontend_dir}}; npm run test; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+# --------------------------------------------------------------------
+# OpenAPI-Typen
+gen-api:
+    Push-Location {{frontend_dir}}; npm run gen:api; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+# --------------------------------------------------------------------
+# Alembic (DEV & TEST)
+migrate-status:
+    Push-Location {{backend_dir}}; uv run alembic current -v; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+migrate-up:
+    Push-Location {{backend_dir}}; uv run alembic upgrade head; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+migrate-rev msg:
+    Push-Location {{backend_dir}}; uv run alembic revision --autogenerate -m "{{msg}}"; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+migrate-status-test:
+    Push-Location {{backend_dir}}; $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_dev:arcanalyse_dev@localhost:5432/arcanalyse_test"; uv run alembic current -v; $code=$LASTEXITCODE; Pop-Location; exit $code
+
+migrate-up-test:
+    Push-Location {{backend_dir}}; $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_dev:arcanalyse_dev@localhost:5432/arcanalyse_test"; uv run alembic upgrade head; $code=$LASTEXITCODE; Pop-Location; exit $code
