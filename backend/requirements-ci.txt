@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+sqlmodel
+sqlalchemy[asyncio]
+asyncpg
+alembic
+httpx
+asgi-lifespan
+
+# Dev / QA
+pytest
+pytest-asyncio
+pytest-sugar
+ruff
+black
+mypy

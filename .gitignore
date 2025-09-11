@@ -1,17 +1,49 @@
-# Python / uv
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- IDE ---
+.idea/
+.vscode/
+*.iml
+
+# --- Python ---
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.eggs/
+pip-wheel-metadata/
 
-# Node (für das spätere Frontend)
-node_modules/
-dist/
-.vite/
+# Env-Dateien (Beispiele committen, echte Secrets nie)
+.env
+.env.*
+!backend/.env.example
+!frontend/.env.development.example
 
-# Logs / Misc
+# --- Node/Frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.eslintcache
+frontend/coverage/
+frontend/.cache/
+
+# Generierte API-Typen & Artefakte
+frontend/src/shared/types/api.d.ts
+frontend/backend_openapi.json
+
+# Logs
 *.log
+*.log.*
 
-# IDE
-.idea/
-.DS_Store
+# Sonstiges
+*.bak
+*.tmp
