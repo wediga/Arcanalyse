@@ -73,3 +73,21 @@ pre-commit-install:
 
 pre-commit:
     uv run pre-commit run --all-files
+
+
+# -----------------------------------------------------------------------------
+# Pre-commit verification (non-mutating): format, lint, types, BE+FE tests
+
+# Black in --check-Mode, nur wenn es Python-Dateien gibt
+format-check:
+    if ((Get-ChildItem -Path backend -Recurse -Include *.py -File -ErrorAction SilentlyContinue)) { uv run black --check backend; exit $LASTEXITCODE } else { Write-Host "No Python files found in 'backend'. Skipping format-check."; exit 0 }
+
+# Aggregierter Check: bricht beim ersten Fehler ab
+verify:
+    $ErrorActionPreference = "Stop";
+    just format-check;
+    just lint;
+    just typecheck;
+    just test-be;
+    just test-fe;
+    Write-Host "✔ Verify passed: format, lint, types, backend & frontend tests";
