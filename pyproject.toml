@@ -10,11 +10,13 @@ dependencies = []
 [tool.black]
 line-length = 100
 target-version = ["py312"]
-preview = false
+preview = true
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+src = ["backend"]
+extend-exclude = [".venv", "backend/.venv"]
 
 [tool.ruff.lint]
 # Minimal, aber sinnvoll: PEP8/Flake (E/F/W), Imports (I), Bugbear (B), pyupgrade (UP)

@@ -6,3 +6,4 @@
 *.js eol=lf
 *.css eol=lf
 *.md eol=lf
+*.py text eol=lf
