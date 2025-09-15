@@ -3,10 +3,11 @@ from typing import Any
 
 import pytest
 import pytest_asyncio
-from app.main import create_app
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
+
+from app.main import create_app
 
 
 @pytest.fixture(scope="session")
