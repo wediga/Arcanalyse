@@ -1,10 +1,11 @@
+# backend/app/models/_base.py
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Any, cast
 from uuid import UUID as PyUUID
 
-from sqlalchemy import BigInteger, Column, DateTime, Identity, Text, text
+from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Identity, Text, func, text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.schema import FetchedValue
@@ -27,7 +28,7 @@ class IntPKMixin(SQLModel):
 
 
 class UUIDPKMixin(SQLModel):
-    """UUID primary key mixin (requires PostgreSQL `pgcrypto`)."""
+    """UUID primary key mixin (requires PostgreSQL pgcrypto)."""
 
     id: PyUUID | None = Field(
         default=None,
@@ -43,16 +44,14 @@ class UUIDPKMixin(SQLModel):
 
 
 class TimestampMixin(SQLModel):
-    """
-    Server-managed timestamps using CURRENT_TIMESTAMP (timezone-aware).
-    """
+    """Server-managed timestamps using NOW() (timezone-aware)."""
 
     created_at: datetime | None = Field(
         default=None,
         sa_column=Column(
             DateTime(timezone=True),
             nullable=False,
-            server_default=cast(FetchedValue, text("CURRENT_TIMESTAMP")),
+            server_default=func.now(),  # INSERT: DB setzt NOW()
         ),
     )
     updated_at: datetime | None = Field(
@@ -60,9 +59,42 @@ class TimestampMixin(SQLModel):
         sa_column=Column(
             DateTime(timezone=True),
             nullable=False,
-            server_default=cast(FetchedValue, text("CURRENT_TIMESTAMP")),
-            server_onupdate=cast(FetchedValue, text("CURRENT_TIMESTAMP")),
+            server_default=func.now(),  # INSERT
+            onupdate=func.now(),  # UPDATE: ORM setzt NOW()
         ),
+    )
+
+
+# --- Audit mixins -------------------------------------------------------------
+
+
+class ActorAuditMixin(SQLModel):
+    """References to the actor who created/updated the row (FK to app_user)."""
+
+    created_by_id: PyUUID | None = Field(
+        default=None,
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            ForeignKey("app_user.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
+    )
+    updated_by_id: PyUUID | None = Field(
+        default=None,
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            ForeignKey("app_user.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
+    )
+
+
+class SoftDeleteMixin(SQLModel):
+    """Optional soft delete timestamp."""
+
+    deleted_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
     )
 
 

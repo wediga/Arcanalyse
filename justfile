@@ -24,6 +24,19 @@ backend:
 frontend:
     Push-Location {{frontend_dir}}; npm run dev -- --open --host; $code=$LASTEXITCODE; Pop-Location; exit $code
 
+seed-system-user:
+    $dir = "."; if (Test-Path "backend/app") { $dir = "backend" }; \
+    Push-Location $dir; \
+    uv run python -m app.seeds.system_user; \
+    $code=$LASTEXITCODE; Pop-Location; exit $code
+
+seed-system-user-test:
+    $dir = "."; if (Test-Path "backend/app") { $dir = "backend" }; \
+    Push-Location $dir; \
+    $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_test:arcanalyse_test@localhost:5432/arcanalyse_test"; \
+    uv run python -m app.seeds.system_user; \
+    $code=$LASTEXITCODE; Pop-Location; exit $code
+
 # --------------------------------------------------------------------
 # Qualität
 lint:
@@ -66,7 +79,7 @@ migrate-status-test:
     Push-Location {{backend_dir}}; $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_dev:arcanalyse_dev@localhost:5432/arcanalyse_test"; uv run alembic current -v; $code=$LASTEXITCODE; Pop-Location; exit $code
 
 migrate-up-test:
-    Push-Location {{backend_dir}}; $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_dev:arcanalyse_dev@localhost:5432/arcanalyse_test"; uv run alembic upgrade head; $code=$LASTEXITCODE; Pop-Location; exit $code
+    Push-Location {{backend_dir}}; $env:DATABASE_URL="postgresql+asyncpg://arcanalyse_test:arcanalyse_test@localhost:5432/arcanalyse_test"; uv run alembic upgrade head; $code=$LASTEXITCODE; Pop-Location; exit $code
 
 pre-commit-install:
     uv run pre-commit install
@@ -83,7 +96,6 @@ fix-local:
     uv run black .
 
 fix:
-    uv run pre-commit run --all-files || true
     uv run pre-commit run --all-files
 
 # Black in --check-Mode, nur wenn es Python-Dateien gibt
