@@ -5,8 +5,6 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from .base import ReadSchema
-
 # ---------------------------------------------------------------------------
 # Gemeinsame Basisklassen für Lookups (override von Timestamps -> optional)
 # ---------------------------------------------------------------------------
@@ -81,15 +79,14 @@ class AbilityRead(LookupRead):
 # ---------------------------------------------------------------------------
 
 
-class SourceRead(ReadSchema):
+class SourceRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     code: str
     title: str
     abbrev: str | None = None
     release_year: int | None = None
     publisher: str | None = None
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 # ---------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 # backend/app/main.py
+from __future__ import annotations
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.health import router as health_router
-from app.api.v1.lookups import router as lookups_router
-from app.api.v1.version import router as version_router
+from app.api.main import api_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 
@@ -28,10 +28,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Routers
-    app.include_router(health_router, prefix="/api/v1")
-    app.include_router(version_router, prefix="/api/v1")
-    app.include_router(lookups_router, prefix="/api/v1")
+    # nur EIN Include: der Aggregator enthält alle v1-Router (health, version, lookups, users, …)
+    app.include_router(api_router)
 
     return app
 

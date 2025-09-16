@@ -1,11 +1,10 @@
 # backend/app/api/main.py
+from __future__ import annotations
+
 from fastapi import APIRouter
 
-from app.api.v1.health import router as health_router
-from app.api.v1.lookups import router as lookups_router
-from app.api.v1.version import router as version_router
+from app.api.v1 import router as v1_router
 
 api_router = APIRouter()
-api_router.include_router(health_router)
-api_router.include_router(version_router)
-api_router.include_router(lookups_router)
+# alle v1-Module (health, version, lookups, users, …) erscheinen unter /api/v1/…
+api_router.include_router(v1_router, prefix="/api/v1")
