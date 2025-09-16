@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -28,7 +29,10 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-@pytest.fixture(scope="session", autouse=True)
+RUN_SEED = os.getenv("SEED_SYSTEM_USER", "0") == "1"
+
+
+@pytest.fixture(scope="session", autouse=RUN_SEED)
 def _seed_system_user_once() -> None:
     """Seedet den System-User einmal pro Test-Session (idempotent)."""
     settings = get_settings()
