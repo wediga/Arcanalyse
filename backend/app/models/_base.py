@@ -75,7 +75,7 @@ class ActorAuditMixin(SQLModel):
         default=None,
         sa_column=Column(
             PG_UUID(as_uuid=True),
-            ForeignKey("app_user.id", ondelete="SET NULL"),
+            ForeignKey("app_user.id", ondelete="RESTRICT"),
             nullable=True,
         ),
     )
@@ -83,7 +83,7 @@ class ActorAuditMixin(SQLModel):
         default=None,
         sa_column=Column(
             PG_UUID(as_uuid=True),
-            ForeignKey("app_user.id", ondelete="SET NULL"),
+            ForeignKey("app_user.id", ondelete="RESTRICT"),
             nullable=True,
         ),
     )
