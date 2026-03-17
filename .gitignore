@@ -1,0 +1,47 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+build/
+dist/
+
+# --- Virtual envs ---
+.venv/
+.venv-training/
+venv/
+ENV/
+
+# --- Tool caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.coverage.*
+*.log
+
+# --- Environment / secrets ---
+.env
+.env.*
+*.pem
+*.key
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- JetBrains / PyCharm ---
+.idea/
+
+# --- Claude Code ---
+# Note: .claude/ is kept in git for the internal repo, but excluded from public repo sync
+# .claude/*
+
+# --- Backups / Archives ---
+*.zip
+.claude - Copy/
+
+# --- MkDocs ---
+site/

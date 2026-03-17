@@ -1,0 +1,28 @@
+[project]
+name = "arcanalyse-api"
+version = "0.1.0"
+requires-python = ">=3.12"
+authors = [
+    { name = "wediga", email = "" }
+]
+dependencies = [
+    "arcanalyse-core",
+    "arcanalyse-db",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.4,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+arcanalyse-core = { workspace = true }
+arcanalyse-db   = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "mkdocstrings-python>=2.0.3",
+    "zensical>=0.0.23",
+]

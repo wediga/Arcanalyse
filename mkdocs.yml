@@ -1,0 +1,23 @@
+site_name: Arcanalyse
+theme:
+  variant: modern
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_section_style: table
+
+nav:
+  - Home: index.md
+  - Development:
+      - Setup: dev/setup.md
+  - Architecture:
+      - Overview: architecture/overview.md
+  - Reference:
+      - Core: reference/core.md
+      - DB: reference/db.md
+      - API: reference/api.md
+      - Training: reference/training.md
