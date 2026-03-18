@@ -3,7 +3,7 @@ name = "arcanalyse-api"
 version = "0.1.0"
 requires-python = ">=3.12"
 authors = [
-    { name = "wediga", email = "" }
+    { name = "wediga" }
 ]
 dependencies = [
     "arcanalyse-core",
@@ -22,7 +22,4 @@ arcanalyse-core = { workspace = true }
 arcanalyse-db   = { workspace = true }
 
 [dependency-groups]
-dev = [
-    "mkdocstrings-python>=2.0.3",
-    "zensical>=0.0.23",
-]
+dev = []

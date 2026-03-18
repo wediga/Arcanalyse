@@ -9,6 +9,7 @@ arcanalyse/
 │   ├── arcanalyse-core/       # Domain Logic (pure Python)
 │   ├── arcanalyse-db/         # Persistence Layer
 │   └── arcanalyse-training/   # ML Pipeline (isolated)
+├── frontend/                  # Next.js Frontend + Landing Page
 ├── docs/
 └── pyproject.toml             # Workspace Root
 ```

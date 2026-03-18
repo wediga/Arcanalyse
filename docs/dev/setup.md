@@ -3,13 +3,14 @@
 ## Voraussetzungen
 
 - **Python:** 3.12 (via `.python-version`)
+- **Node.js:** 20+ (für Frontend)
 - **uv:** Package Manager ([Installation](https://docs.astral.sh/uv/getting-started/installation/))
-- **Docker:** Für PostgreSQL (optional: lokale Installation)
+- **Docker:** Für PostgreSQL
 - **IDE:** PyCharm (empfohlen)
 
 ## Projekt klonen & Setup
 
-```powershell
+```bash
 # Repository klonen
 git clone <repo-url>
 cd Arcanalyse
@@ -27,7 +28,7 @@ uv run python --version
 
 Für API-Entwicklung und allgemeine Arbeit.
 
-```powershell
+```bash
 # Sync
 uv sync
 
@@ -42,6 +43,17 @@ uv run pytest
 
 Isoliert für ML-Training, um Konflikte zu vermeiden.
 
+```bash
+# Erstellen/Sync
+UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training
+
+# Command ausführen
+UV_PROJECT_ENVIRONMENT=.venv-training uv run --package arcanalyse-training <command>
+```
+
+<details>
+<summary>PowerShell (Windows)</summary>
+
 ```powershell
 # Erstellen/Sync
 $env:UV_PROJECT_ENVIRONMENT = ".venv-training"
@@ -53,36 +65,17 @@ $env:UV_PROJECT_ENVIRONMENT = ".venv-training"
 uv run --package arcanalyse-training <command>
 Remove-Item Env:\UV_PROJECT_ENVIRONMENT
 ```
+</details>
 
 ## Datenbank (PostgreSQL)
 
 ### Option A: Docker (empfohlen)
 
-```powershell
-# docker-compose.yml erstellen (siehe unten)
+```bash
 docker compose up -d
 
 # Verbindung testen
 uv run python -c "from arcanalyse_db import engine; print('Connected!')"
-```
-
-**docker-compose.yml:**
-```yaml
-version: "3.8"
-services:
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: arcanalyse
-      POSTGRES_PASSWORD: arcanalyse
-      POSTGRES_DB: arcanalyse
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
 ```
 
 ### Option B: Lokale PostgreSQL Installation
@@ -116,8 +109,8 @@ Arcanalyse/
 │   │   └── src/arcanalyse_db/
 │   └── arcanalyse-training/ # ML (isoliert)
 │       └── src/arcanalyse_training/
+├── frontend/                # Next.js Frontend + Landing Page
 ├── docs/                    # Dokumentation
-├── tests/                   # Tests (TODO)
 ├── .env                     # Lokale Config (nicht committed)
 ├── .env.example             # Template für .env
 ├── pyproject.toml           # Workspace Root
@@ -128,7 +121,7 @@ Arcanalyse/
 
 ### Dependency hinzufügen
 
-```powershell
+```bash
 # Zu Root (arcanalyse-api)
 uv add fastapi
 
@@ -140,26 +133,19 @@ cd ../..
 
 ### API starten (sobald implementiert)
 
-```powershell
+```bash
 uv run uvicorn arcanalyse_api:app --reload
 ```
 
 ### Tests ausführen
 
-```powershell
+```bash
 uv run pytest
-```
-
-### Docs lokal anschauen
-
-```powershell
-uv run mkdocs serve
-# → http://localhost:8000
 ```
 
 ## IDE-Setup (PyCharm)
 
-1. **Python Interpreter:** `.venv/Scripts/python.exe` auswählen
+1. **Python Interpreter:** `.venv/bin/python` auswählen (Windows: `.venv/Scripts/python.exe`)
 2. **Mark as Sources Root:**
    - `src/`
    - `packages/arcanalyse-core/src/`
@@ -171,26 +157,24 @@ uv run mkdocs serve
 
 ### "Module not found" bei Imports
 
-```powershell
+```bash
 # Sync neu ausführen
 uv sync
 
 # Prüfen ob Package installiert
-uv run pip list | Select-String arcanalyse
+uv run pip list | grep arcanalyse
 ```
 
 ### PostgreSQL Connection Error
 
 1. Docker läuft? `docker ps`
-2. Port 5432 frei? `netstat -an | Select-String 5432`
+2. Port 5432 frei? `ss -tlnp | grep 5432` (Linux) / `netstat -an | Select-String 5432` (Windows)
 3. `.env` korrekt?
 
 ### Training Environment Probleme
 
-```powershell
+```bash
 # Komplett neu erstellen
-Remove-Item -Recurse -Force .venv-training
-$env:UV_PROJECT_ENVIRONMENT = ".venv-training"
-uv sync --package arcanalyse-training
-Remove-Item Env:\UV_PROJECT_ENVIRONMENT
+rm -rf .venv-training
+UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training
 ```
