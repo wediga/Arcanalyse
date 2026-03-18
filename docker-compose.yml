@@ -1,0 +1,21 @@
+services:
+  postgres-test:
+    image: postgres:16
+    container_name: arcanalyse-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: arcanalyse
+      POSTGRES_PASSWORD: arcanalyse
+      POSTGRES_DB: arcanalyse_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arcanalyse"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata-test:

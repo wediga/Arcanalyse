@@ -22,4 +22,11 @@ arcanalyse-core = { workspace = true }
 arcanalyse-db   = { workspace = true }
 
 [dependency-groups]
-dev = []
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "packages/arcanalyse-db/tests",
+    "packages/arcanalyse-core/tests",
+    "src/arcanalyse_api/tests",
+]

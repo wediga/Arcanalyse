@@ -1,0 +1,17 @@
+# Arcanalyse services — append to /opt/reverse-proxy/Caddyfile on ax41
+
+arcanalyse.com {
+	reverse_proxy arcanalyse-frontend:3000
+}
+
+analytics.arcanalyse.com {
+	reverse_proxy arcanalyse-umami:3000
+}
+
+surveys.arcanalyse.com {
+	reverse_proxy arcanalyse-formbricks:3000
+}
+
+mail.arcanalyse.com {
+	reverse_proxy arcanalyse-listmonk:9000
+}
