@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    container_name: arcanalyse-frontend
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

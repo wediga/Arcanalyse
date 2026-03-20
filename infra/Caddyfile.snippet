@@ -1,17 +1,26 @@
 # Arcanalyse services — append to /opt/reverse-proxy/Caddyfile on ax41
 
-arcanalyse.com {
+# Landing Page (staging)
+arcanalyse.wediga.dev {
 	reverse_proxy arcanalyse-frontend:3000
 }
 
-analytics.arcanalyse.com {
-	reverse_proxy arcanalyse-umami:3000
-}
+# Landing Page (production, when domain is registered)
+# arcanalyse.com {
+# 	reverse_proxy arcanalyse-frontend:3000
+# }
 
-surveys.arcanalyse.com {
-	reverse_proxy arcanalyse-formbricks:3000
-}
+# Analytics (when deployed)
+# analytics.arcanalyse.com {
+# 	reverse_proxy arcanalyse-umami:3000
+# }
 
-mail.arcanalyse.com {
-	reverse_proxy arcanalyse-listmonk:9000
-}
+# Surveys (when deployed)
+# surveys.arcanalyse.com {
+# 	reverse_proxy arcanalyse-formbricks:3000
+# }
+
+# Email (when deployed)
+# mail.arcanalyse.com {
+# 	reverse_proxy arcanalyse-listmonk:9000
+# }
