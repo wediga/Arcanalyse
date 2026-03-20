@@ -19,7 +19,7 @@ export default function Footer() {
           </a>
         </div>
         <span className="text-xs text-text-muted/50">
-          &copy; {new Date().getFullYear()} Arcanalyse
+          &copy; {new Date().getFullYear()} Arcanalyse. All rights reserved.
         </span>
       </div>
     </footer>
