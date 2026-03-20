@@ -27,6 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          defer
+          src="https://arcanalyse-analytics.wediga.dev/script.js"
+          data-website-id="95dc7b4b-08bb-475a-abb1-b12a0f1acde8"
+        />
+      </head>
       <body className={`${cinzel.variable} ${outfit.variable} antialiased`}>
         {/* Ambient background animation */}
         <div className="ambient-bg" aria-hidden="true">
