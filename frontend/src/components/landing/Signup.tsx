@@ -33,6 +33,7 @@ export default function Signup() {
 
     const listmonkUrl = process.env.NEXT_PUBLIC_LISTMONK_URL;
     if (!listmonkUrl) {
+      localStorage.setItem("arcanalyse_email", email);
       setStatus("success");
       return;
     }
@@ -49,6 +50,7 @@ export default function Signup() {
         }),
       });
       if (res.ok) {
+        localStorage.setItem("arcanalyse_email", email);
         setStatus("success");
         setEmail("");
       } else {
@@ -95,9 +97,17 @@ export default function Signup() {
         </form>
 
         {status === "success" && (
-          <p className="mt-4 text-sm text-accent">
-            You&apos;re on the list. We&apos;ll send word when it&apos;s ready.
-          </p>
+          <div className="mt-4">
+            <p className="text-sm text-accent">
+              You&apos;re on the list. We&apos;ll send word when it&apos;s ready.
+            </p>
+            <a
+              href="/survey"
+              className="mt-2 inline-block text-sm text-text-muted accent-link"
+            >
+              Help us build the right tool - take a quick survey
+            </a>
+          </div>
         )}
         {status === "error" && (
           <p className="mt-4 text-sm text-red-400">

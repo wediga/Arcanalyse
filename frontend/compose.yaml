@@ -1,6 +1,16 @@
 services:
   web:
-    build: .
+    env_file:
+      - ../infra/.env
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_LISTMONK_URL: ${NEXT_PUBLIC_LISTMONK_URL}
+        NEXT_PUBLIC_LISTMONK_LIST_UUID: ${NEXT_PUBLIC_LISTMONK_LIST_UUID}
+        NEXT_PUBLIC_FORMBRICKS_URL: ${NEXT_PUBLIC_FORMBRICKS_URL}
+        NEXT_PUBLIC_FORMBRICKS_ENV_ID: ${NEXT_PUBLIC_FORMBRICKS_ENV_ID}
+    environment:
+      FORMBRICKS_API_KEY: ${FORMBRICKS_API_KEY}
     container_name: arcanalyse-frontend
     restart: unless-stopped
     networks:

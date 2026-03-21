@@ -3,6 +3,7 @@ import Problem from "@/components/landing/Problem";
 import Solution from "@/components/landing/Solution";
 import Features from "@/components/landing/Features";
 import Signup from "@/components/landing/Signup";
+import SurveyCallout from "@/components/landing/SurveyCallout";
 import Footer from "@/components/landing/Footer";
 import OrnamentDivider from "@/components/landing/OrnamentDivider";
 
@@ -18,6 +19,8 @@ export default function Home() {
       <Features />
       <OrnamentDivider />
       <Signup />
+      <OrnamentDivider />
+      <SurveyCallout />
       <Footer />
     </main>
   );
