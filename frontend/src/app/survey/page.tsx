@@ -3,6 +3,8 @@ import { getSurveys } from "@/lib/formbricks";
 import type { Metadata } from "next";
 import D20Icon from "@/components/landing/D20Icon";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Surveys - Arcanalyse",
   description: "Help us build the right tool. Take a quick survey.",

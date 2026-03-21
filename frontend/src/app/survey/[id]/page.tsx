@@ -3,6 +3,8 @@ import { getSurvey } from "@/lib/formbricks";
 import SurveyRenderer from "@/components/survey/SurveyRenderer";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
