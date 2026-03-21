@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: arcanalyse-postgres
     restart: unless-stopped
     environment:
@@ -58,6 +58,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/formbricks
       NEXTAUTH_SECRET: ${FORMBRICKS_NEXTAUTH_SECRET}
       NEXTAUTH_URL: ${FORMBRICKS_NEXTAUTH_URL}
+      WEBAPP_URL: ${WEBAPP_URL}
+      CRON_SECRET: ${CRON_SECRET}
+      ENCRYPTION_KEY: ${FORMBRICKS_ENCRYPTION_KEY}
     depends_on:
       postgres:
         condition: service_healthy
