@@ -76,11 +76,11 @@ arcanalyse/
 | Environment | Zweck | Aktivierung |
 |-------------|-------|-------------|
 | `.venv` | API-Entwicklung | `uv sync` |
-| `.venv-training` | ML-Training | Siehe CLAUDE.md |
+| `.venv-training` | ML-Training | `UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training` |
 
 ## Externe Datenquellen
 
 - **5e-database** (SRD): https://github.com/5e-bits/5e-database
   - JSON-Format, REST API unter dnd5eapi.co
   - Wird für initialen Monster/Spell-Import genutzt
-  - Siehe [SRD-Integration](decisions/003-srd-integration.md)
+  - Design-Entscheidung: Vollständige Statblocks ab Tag 1 (kein Lazy-Loading oder Stub-Ansatz)

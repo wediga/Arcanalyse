@@ -29,7 +29,8 @@ Arcanalyse addresses these issues by combining deterministic analysis with simul
 
 ## Tech Stack
 
-- **Backend**: FastAPI
+- **Backend**: Python 3.12, FastAPI
+- **Frontend**: Next.js (TypeScript, Tailwind CSS)
 - **Database**: PostgreSQL with SQLModel/SQLAlchemy
 - **Testing**: pytest
 - **Package Management**: uv (workspace-based monorepo)
@@ -42,34 +43,30 @@ The project is structured as a uv workspace with multiple packages:
 arcanalyse-api      → FastAPI REST API
 ├── arcanalyse-core → Domain logic, analysis engine
 ├── arcanalyse-db   → Persistence layer (SQLModel)
-└── (additional packages for specialized features)
+└── frontend/       → Next.js frontend + landing page
 ```
 
 ## Project Status
 
-⚠️ **Early Development** - This project is in active development and not yet ready for production use.
-
-### Current Focus
-
-- Database schema and ORM setup
-- SRD data integration
-- Core encounter analysis algorithms
-- Basic API endpoints
+**Phase 0 (Validation)** is nearly complete. The landing page is live with email signup, analytics, and user surveys. Backend development starts next.
 
 ### Roadmap
 
-- [ ] Complete database schema with migrations
-- [ ] SRD monster/spell import
+- [x] Landing page with email signup
+- [x] Analytics and survey infrastructure
+- [ ] Core domain types and models
+- [ ] Database schema and SRD data import
 - [ ] Deterministic difficulty metrics
 - [ ] Monte Carlo simulation engine
-- [ ] REST API for encounter management
-- [ ] Web frontend (future)
+- [ ] REST API for encounter analysis
+- [ ] Web frontend (encounter builder + results)
 
 ## Development
 
 ### Prerequisites
 
 - Python 3.12+
+- Node.js 22+
 - PostgreSQL 16+
 - [uv](https://github.com/astral-sh/uv) package manager
 
@@ -80,14 +77,19 @@ arcanalyse-api      → FastAPI REST API
 git clone https://github.com/wediga/Arcanalyse.git
 cd Arcanalyse
 
-# Install dependencies
+# Install Python dependencies
 uv sync
 
-# Start PostgreSQL (via Docker)
+# Start test database (PostgreSQL via Docker)
 docker compose up -d
 
-# Run the development server
-uv run zensical serve
+# Run tests
+uv run pytest
+
+# Start frontend (development)
+cd frontend
+npm install
+npm run dev
 ```
 
 For detailed setup instructions, see the [documentation](docs/dev/setup.md).
@@ -100,7 +102,7 @@ For detailed setup instructions, see the [documentation](docs/dev/setup.md).
 
 ## Contributing
 
-This is currently a personal learning project. Contributions are not being accepted at this time, but feedback and suggestions are welcome via issues.
+This is currently a personal project. Contributions are not being accepted at this time, but feedback and suggestions are welcome via issues.
 
 ## License
 

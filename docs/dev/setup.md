@@ -3,7 +3,7 @@
 ## Voraussetzungen
 
 - **Python:** 3.12 (via `.python-version`)
-- **Node.js:** 20+ (für Frontend)
+- **Node.js:** 22+ (für Frontend)
 - **uv:** Package Manager ([Installation](https://docs.astral.sh/uv/getting-started/installation/))
 - **Docker:** Für PostgreSQL
 - **IDE:** PyCharm (empfohlen)
@@ -74,8 +74,8 @@ Remove-Item Env:\UV_PROJECT_ENVIRONMENT
 ```bash
 docker compose up -d
 
-# Verbindung testen
-uv run python -c "from arcanalyse_db import engine; print('Connected!')"
+# Prüfen ob Container läuft
+docker ps
 ```
 
 ### Option B: Lokale PostgreSQL Installation
@@ -93,7 +93,7 @@ uv run python -c "from arcanalyse_db import engine; print('Connected!')"
 Erstelle `.env` im Projekt-Root (wird nicht committed):
 
 ```env
-DATABASE_URL=postgresql://arcanalyse:arcanalyse@localhost:5432/arcanalyse
+DATABASE_URL_TEST=postgresql://arcanalyse:arcanalyse@localhost:5433/arcanalyse_test
 ```
 
 ## Projekt-Struktur
@@ -168,7 +168,7 @@ uv run pip list | grep arcanalyse
 ### PostgreSQL Connection Error
 
 1. Docker läuft? `docker ps`
-2. Port 5432 frei? `ss -tlnp | grep 5432` (Linux) / `netstat -an | Select-String 5432` (Windows)
+2. Port 5433 frei? `ss -tlnp | grep 5433` (Linux) / `netstat -an | Select-String 5433` (Windows)
 3. `.env` korrekt?
 
 ### Training Environment Probleme
