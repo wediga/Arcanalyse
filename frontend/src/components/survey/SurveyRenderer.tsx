@@ -185,6 +185,7 @@ export default function SurveyRenderer({
           email={email}
           onSubmit={handleEmailSubmit}
           onSkip={handleEmailSkip}
+          intro="Arcanalyse is a tool that simulates your D&D encounters to show you real win/loss odds — instead of relying on CR estimates that get it wrong half the time. We're building it right now and want to hear what you think. This takes about 2 minutes."
         />
       )}
 

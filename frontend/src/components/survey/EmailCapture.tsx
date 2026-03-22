@@ -8,6 +8,7 @@ type Props = {
   onSkip?: () => void;
   headline?: string;
   subtext?: string;
+  intro?: string;
 };
 
 export default function EmailCapture({
@@ -16,11 +17,17 @@ export default function EmailCapture({
   onSkip,
   headline = "Share your email to stay in the loop",
   subtext = "We'll only send launch updates. No spam.",
+  intro,
 }: Props) {
   const [email, setEmail] = useState(initialEmail);
 
   return (
     <div className="text-center">
+      {intro && (
+        <p className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-text-muted">
+          {intro}
+        </p>
+      )}
       <h2 className="font-display text-2xl tracking-tight sm:text-3xl">
         {headline}
       </h2>
