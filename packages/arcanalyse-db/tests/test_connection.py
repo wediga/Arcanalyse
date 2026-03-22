@@ -1,3 +1,8 @@
+import pytest
+
+pytestmark = pytest.mark.db
+
+
 def test_connection(db_connection):
     result = db_connection.execute("SELECT 1").fetchone()
     assert result == (1,)

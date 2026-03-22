@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type {
   FormbricksSurvey,
   FormbricksQuestion,
@@ -83,48 +83,52 @@ function resolveJumpTarget(
   return null;
 }
 
+function loadSavedProgress(surveyId: string) {
+  if (typeof window === "undefined") {
+    return { step: { type: "email" } as Step, email: "", answers: {} as Answers, history: [] as number[], responseId: null as string | null };
+  }
+
+  const storageKey = `survey_progress_${surveyId}`;
+  const done = localStorage.getItem(`survey_done_${surveyId}`);
+  if (done) {
+    return { step: { type: "already-done" } as Step, email: "", answers: {} as Answers, history: [] as number[], responseId: null as string | null };
+  }
+
+  const saved = localStorage.getItem(storageKey);
+  if (saved) {
+    try {
+      const progress = JSON.parse(saved);
+      const restoredAnswers: Answers = progress.answers ?? {};
+      const restoredHistory: number[] = progress.history ?? [];
+      const restoredResponseId: string | null = progress.responseId ?? null;
+      const restoredEmail: string = progress.email ?? "";
+      if (typeof progress.questionIndex === "number") {
+        return { step: { type: "question", index: progress.questionIndex } as Step, email: restoredEmail, answers: restoredAnswers, history: restoredHistory, responseId: restoredResponseId };
+      }
+      return { step: { type: "email" } as Step, email: restoredEmail, answers: restoredAnswers, history: restoredHistory, responseId: restoredResponseId };
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
+  }
+
+  const savedEmail = localStorage.getItem("arcanalyse_email") ?? "";
+  return { step: { type: "email" } as Step, email: savedEmail, answers: {} as Answers, history: [] as number[], responseId: null as string | null };
+}
+
 export default function SurveyRenderer({
   survey,
 }: {
   survey: FormbricksSurvey;
 }) {
-  const [step, setStep] = useState<Step>({ type: "email" });
-  const [email, setEmail] = useState("");
-  const [answers, setAnswers] = useState<Answers>({});
+  const [initial] = useState(() => loadSavedProgress(survey.id));
+  const [step, setStep] = useState<Step>(initial.step);
+  const [email, setEmail] = useState(initial.email);
+  const [answers, setAnswers] = useState<Answers>(initial.answers);
   const [error, setError] = useState("");
-  const [history, setHistory] = useState<number[]>([]);
-  const [responseId, setResponseId] = useState<string | null>(null);
+  const [history, setHistory] = useState<number[]>(initial.history);
+  const [responseId, setResponseId] = useState<string | null>(initial.responseId);
 
   const storageKey = `survey_progress_${survey.id}`;
-
-  useEffect(() => {
-    const done = localStorage.getItem(`survey_done_${survey.id}`);
-    if (done) {
-      setStep({ type: "already-done" });
-      return;
-    }
-
-    // Restore progress
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try {
-        const progress = JSON.parse(saved);
-        setAnswers(progress.answers ?? {});
-        setHistory(progress.history ?? []);
-        setResponseId(progress.responseId ?? null);
-        setEmail(progress.email ?? "");
-        if (typeof progress.questionIndex === "number") {
-          setStep({ type: "question", index: progress.questionIndex });
-          return;
-        }
-      } catch {
-        localStorage.removeItem(storageKey);
-      }
-    }
-
-    const savedEmail = localStorage.getItem("arcanalyse_email") ?? "";
-    setEmail(savedEmail);
-  }, [survey.id, storageKey]);
 
   const totalQuestions = survey.questions.length;
 

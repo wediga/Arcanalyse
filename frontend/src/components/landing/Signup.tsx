@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import D20Icon from "./D20Icon";
 
 export default function Signup() {
@@ -101,12 +102,12 @@ export default function Signup() {
             <p className="text-sm text-accent">
               You&apos;re on the list. We&apos;ll send word when it&apos;s ready.
             </p>
-            <a
+            <Link
               href="/survey"
               className="mt-2 inline-block text-sm text-text-muted accent-link"
             >
               Help us build the right tool - take a quick survey
-            </a>
+            </Link>
           </div>
         )}
         {status === "error" && (

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import D20Icon from "./D20Icon";
 
 export default function Footer() {
@@ -6,12 +7,12 @@ export default function Footer() {
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-6">
         <D20Icon className="h-6 w-6 text-accent/30" />
         <div className="flex gap-8 text-sm text-text-muted">
-          <a href="/survey" className="accent-link">
+          <Link href="/survey" className="accent-link">
             Survey
-          </a>
-          <a href="/impressum" className="accent-link">
+          </Link>
+          <Link href="/impressum" className="accent-link">
             Impressum
-          </a>
+          </Link>
           <a
             href="https://github.com/wediga/Arcanalyse"
             target="_blank"

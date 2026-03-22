@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 
 export default function SurveyCallout() {
   const ref = useRef<HTMLElement>(null);
@@ -36,12 +37,12 @@ export default function SurveyCallout() {
           We&apos;re building Arcanalyse around what DMs actually need.
           A few quick questions go a long way.
         </p>
-        <a
+        <Link
           href="/survey"
           className="fade-up delay-3 mt-8 inline-flex items-center gap-3 rounded-full border border-accent/30 bg-accent/10 px-10 py-4 font-display text-sm tracking-widest text-accent uppercase transition-all hover:border-accent/60 hover:bg-accent/20 hover:shadow-[0_0_30px_-8px_rgba(226,181,90,0.3)]"
         >
           Take the survey
-        </a>
+        </Link>
       </div>
     </section>
   );

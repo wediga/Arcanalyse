@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 type Props = {
   email: string;
@@ -28,9 +29,11 @@ export default function EmailCapture({
   return (
     <div className="text-center">
       {logoUrl && (
-        <img
+        <Image
           src={logoUrl}
           alt=""
+          width={64}
+          height={64}
           className="mx-auto mb-6 h-16 w-auto"
         />
       )}

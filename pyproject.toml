@@ -22,7 +22,7 @@ arcanalyse-core = { workspace = true }
 arcanalyse-db   = { workspace = true }
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "ruff>=0.11"]
 
 [tool.pytest.ini_options]
 testpaths = [
@@ -30,3 +30,16 @@ testpaths = [
     "packages/arcanalyse-core/tests",
     "src/arcanalyse_api/tests",
 ]
+markers = [
+    "db: requires PostgreSQL database connection",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["arcanalyse_api", "arcanalyse_core", "arcanalyse_db", "arcanalyse_training"]

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -36,9 +37,9 @@ export default function Impressum() {
         </section>
       </div>
 
-      <a href="/" className="accent-link mt-12 inline-block text-sm">
+      <Link href="/" className="accent-link mt-12 inline-block text-sm">
         &larr; Back to Arcanalyse
-      </a>
+      </Link>
     </main>
   );
 }

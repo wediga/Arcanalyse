@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSurveys } from "@/lib/formbricks";
 import type { Metadata } from "next";
 import D20Icon from "@/components/landing/D20Icon";
@@ -35,9 +36,9 @@ export default async function SurveyOverview() {
         {surveys.length === 0 && (
           <p className="mt-4 text-lg text-text-muted">
             Check back soon, or{" "}
-            <a href="/#signup" className="accent-link">
+            <Link href="/#signup" className="accent-link">
               sign up for updates
-            </a>
+            </Link>
             .
           </p>
         )}
@@ -62,12 +63,12 @@ export default async function SurveyOverview() {
           </div>
         )}
 
-        <a
+        <Link
           href="/"
           className="mt-10 inline-block text-sm text-text-muted accent-link"
         >
           Back to Arcanalyse
-        </a>
+        </Link>
       </div>
     </main>
   );
