@@ -6,6 +6,36 @@ export type FormbricksChoice = {
   label: { default: string };
 };
 
+export type FormbricksOperand = {
+  type: "question" | "static" | "variable" | "hiddenField";
+  value: string;
+};
+
+export type FormbricksCondition = {
+  id: string;
+  operator: "equals" | "notEquals" | "greaterThan" | "lessThan" | "contains" | "notContains";
+  leftOperand: FormbricksOperand;
+  rightOperand: FormbricksOperand;
+};
+
+export type FormbricksConditionGroup = {
+  id: string;
+  connector: "and" | "or";
+  conditions: FormbricksCondition[];
+};
+
+export type FormbricksAction = {
+  id: string;
+  objective: "jumpToQuestion" | "calculate" | "requireAnswer" | "setVariable";
+  target?: string;
+};
+
+export type FormbricksLogicBlock = {
+  id: string;
+  actions: FormbricksAction[];
+  conditions: FormbricksConditionGroup;
+};
+
 export type FormbricksQuestion = {
   id: string;
   type: string;
@@ -19,7 +49,10 @@ export type FormbricksQuestion = {
   range?: number;
   scale?: string;
   label?: { default: string };
+  lowerLabel?: { default: string };
+  upperLabel?: { default: string };
   html?: { default: string };
+  logic?: FormbricksLogicBlock[];
 };
 
 export type FormbricksEnding = {
@@ -39,6 +72,7 @@ export type FormbricksSurvey = {
     headline?: { default: string };
     html?: { default: string };
     buttonLabel?: { default: string };
+    fileUrl?: string;
   };
   endings: FormbricksEnding[];
 };

@@ -14,12 +14,12 @@ export default function MultipleChoiceSingle({
   return (
     <div className="grid gap-3">
       {question.choices?.map((choice) => {
-        const selected = value === choice.label.default;
+        const selected = value === choice.id;
         return (
           <button
             key={choice.id}
             type="button"
-            onClick={() => onChange(choice.label.default)}
+            onClick={() => onChange(choice.id)}
             className={`rounded-lg border p-4 text-left transition-all ${
               selected
                 ? "border-accent/40 bg-accent/10 text-text-primary shadow-[0_0_20px_-6px_rgba(226,181,90,0.15)]"

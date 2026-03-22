@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { FormbricksSurvey, FormbricksQuestion } from "@/lib/formbricks";
+import type {
+  FormbricksSurvey,
+  FormbricksQuestion,
+  FormbricksLogicBlock,
+  FormbricksCondition,
+  FormbricksConditionGroup,
+} from "@/lib/formbricks";
 import EmailCapture from "./EmailCapture";
 import SurveyComplete from "./SurveyComplete";
 import OpenText from "./questions/OpenText";
@@ -25,6 +31,58 @@ type Step =
 
 type Answers = Record<string, string | string[] | number>;
 
+function evaluateCondition(
+  condition: FormbricksCondition,
+  answers: Answers,
+): boolean {
+  const left =
+    condition.leftOperand.type === "question"
+      ? answers[condition.leftOperand.value]
+      : condition.leftOperand.value;
+  const right = condition.rightOperand.value;
+
+  switch (condition.operator) {
+    case "equals":
+      return Array.isArray(left) ? left.includes(right) : String(left) === String(right);
+    case "notEquals":
+      return Array.isArray(left) ? !left.includes(right) : String(left) !== String(right);
+    case "greaterThan":
+      return Number(left) > Number(right);
+    case "lessThan":
+      return Number(left) < Number(right);
+    case "contains":
+      return String(left).includes(right);
+    case "notContains":
+      return !String(left).includes(right);
+    default:
+      return false;
+  }
+}
+
+function evaluateConditionGroup(
+  group: FormbricksConditionGroup,
+  answers: Answers,
+): boolean {
+  const results = group.conditions.map((c) => evaluateCondition(c, answers));
+  return group.connector === "and"
+    ? results.every(Boolean)
+    : results.some(Boolean);
+}
+
+function resolveJumpTarget(
+  logic: FormbricksLogicBlock[] | undefined,
+  answers: Answers,
+): string | null {
+  if (!logic) return null;
+  for (const block of logic) {
+    if (evaluateConditionGroup(block.conditions, answers)) {
+      const jump = block.actions.find((a) => a.objective === "jumpToQuestion");
+      if (jump?.target) return jump.target;
+    }
+  }
+  return null;
+}
+
 export default function SurveyRenderer({
   survey,
 }: {
@@ -34,6 +92,10 @@ export default function SurveyRenderer({
   const [email, setEmail] = useState("");
   const [answers, setAnswers] = useState<Answers>({});
   const [error, setError] = useState("");
+  const [history, setHistory] = useState<number[]>([]);
+  const [responseId, setResponseId] = useState<string | null>(null);
+
+  const storageKey = `survey_progress_${survey.id}`;
 
   useEffect(() => {
     const done = localStorage.getItem(`survey_done_${survey.id}`);
@@ -41,9 +103,28 @@ export default function SurveyRenderer({
       setStep({ type: "already-done" });
       return;
     }
+
+    // Restore progress
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        const progress = JSON.parse(saved);
+        setAnswers(progress.answers ?? {});
+        setHistory(progress.history ?? []);
+        setResponseId(progress.responseId ?? null);
+        setEmail(progress.email ?? "");
+        if (typeof progress.questionIndex === "number") {
+          setStep({ type: "question", index: progress.questionIndex });
+          return;
+        }
+      } catch {
+        localStorage.removeItem(storageKey);
+      }
+    }
+
     const savedEmail = localStorage.getItem("arcanalyse_email") ?? "";
     setEmail(savedEmail);
-  }, [survey.id]);
+  }, [survey.id, storageKey]);
 
   const totalQuestions = survey.questions.length;
 
@@ -64,24 +145,89 @@ export default function SurveyRenderer({
     }
   }, []);
 
+  function saveProgress(questionIndex: number, currentAnswers: Answers, currentHistory: number[]) {
+    localStorage.setItem(storageKey, JSON.stringify({
+      questionIndex,
+      answers: currentAnswers,
+      history: currentHistory,
+      responseId,
+      email,
+    }));
+  }
+
+  async function sendPartialResponse(currentAnswers: Answers) {
+    if (!FORMBRICKS_URL || !FORMBRICKS_ENV_ID) return;
+
+    try {
+      if (!responseId) {
+        // Create new partial response
+        const res = await fetch(
+          `${FORMBRICKS_URL}/api/v1/client/${FORMBRICKS_ENV_ID}/responses`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              surveyId: survey.id,
+              finished: false,
+              data: currentAnswers,
+            }),
+          }
+        );
+        if (res.ok) {
+          const json = await res.json();
+          setResponseId(json.data?.id ?? null);
+        }
+      } else {
+        // Update existing response
+        await fetch(
+          `${FORMBRICKS_URL}/api/v1/client/${FORMBRICKS_ENV_ID}/responses/${responseId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              finished: false,
+              data: currentAnswers,
+            }),
+          }
+        );
+      }
+    } catch {
+      // Partial tracking is best-effort
+    }
+  }
+
   async function submitToFormbricks() {
     if (!FORMBRICKS_URL || !FORMBRICKS_ENV_ID) return;
 
-    const res = await fetch(
-      `${FORMBRICKS_URL}/api/v1/client/${FORMBRICKS_ENV_ID}/responses`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          surveyId: survey.id,
-          finished: true,
-          data: answers,
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error("Failed to submit survey");
+    if (responseId) {
+      // Finalize existing partial response
+      const res = await fetch(
+        `${FORMBRICKS_URL}/api/v1/client/${FORMBRICKS_ENV_ID}/responses/${responseId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            finished: true,
+            data: answers,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to submit survey");
+    } else {
+      // No partial response yet, create a finished one
+      const res = await fetch(
+        `${FORMBRICKS_URL}/api/v1/client/${FORMBRICKS_ENV_ID}/responses`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            surveyId: survey.id,
+            finished: true,
+            data: answers,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to submit survey");
     }
   }
 
@@ -91,6 +237,7 @@ export default function SurveyRenderer({
 
     try {
       await submitToFormbricks();
+      localStorage.removeItem(storageKey);
       localStorage.setItem(`survey_done_${survey.id}`, "true");
 
       if (email) {
@@ -137,15 +284,14 @@ export default function SurveyRenderer({
     return true;
   }
 
-  // Progress indicator
-  const progressSteps = totalQuestions + 1; // +1 for email
-  const currentProgress =
+  // Progress based on visited questions + remaining questions from current position.
+  // Dynamically adjusts when skip logic reduces the total.
+  const progressPercent =
     step.type === "email"
       ? 0
       : step.type === "question"
-        ? step.index + 1
-        : progressSteps;
-  const progressPercent = (currentProgress / progressSteps) * 100;
+        ? ((history.length + 1) / (history.length + totalQuestions - step.index)) * 100
+        : 100;
 
   // Render
   if (step.type === "already-done") {
@@ -185,7 +331,9 @@ export default function SurveyRenderer({
           email={email}
           onSubmit={handleEmailSubmit}
           onSkip={handleEmailSkip}
-          intro="Arcanalyse is a tool that simulates your D&D encounters to show you real win/loss odds — instead of relying on CR estimates that get it wrong half the time. We're building it right now and want to hear what you think. This takes about 2 minutes."
+          introHeadline={survey.welcomeCard.enabled ? survey.welcomeCard.headline?.default : undefined}
+          introHtml={survey.welcomeCard.enabled ? survey.welcomeCard.html?.default : undefined}
+          logoUrl={survey.welcomeCard.enabled ? survey.welcomeCard.fileUrl || undefined : undefined}
         />
       )}
 
@@ -215,18 +363,48 @@ export default function SurveyRenderer({
           answers={answers}
           setAnswer={setAnswer}
           onBack={
-            step.index === 0
+            history.length === 0
               ? () => setStep({ type: "email" })
-              : () => setStep({ type: "question", index: step.index - 1 })
+              : () => {
+                  const prev = history[history.length - 1];
+                  setHistory((h) => h.slice(0, -1));
+                  setStep({ type: "question", index: prev });
+                }
           }
-          onNext={
-            step.index < totalQuestions - 1
-              ? () => setStep({ type: "question", index: step.index + 1 })
-              : handleSubmit
-          }
+          onNext={() => {
+            sendPartialResponse(answers);
+            const currentQuestion = survey.questions[step.index];
+            const jumpTarget = resolveJumpTarget(currentQuestion.logic, answers);
+            const newHistory = [...history, step.index];
+
+            if (jumpTarget) {
+              const targetIndex = survey.questions.findIndex((q) => q.id === jumpTarget);
+              if (targetIndex !== -1) {
+                setHistory(newHistory);
+                if (targetIndex < totalQuestions) {
+                  saveProgress(targetIndex, answers, newHistory);
+                  setStep({ type: "question", index: targetIndex });
+                } else {
+                  handleSubmit();
+                }
+                return;
+              }
+            }
+
+            if (step.index < totalQuestions - 1) {
+              setHistory(newHistory);
+              saveProgress(step.index + 1, answers, newHistory);
+              setStep({ type: "question", index: step.index + 1 });
+            } else {
+              handleSubmit();
+            }
+          }}
           canAdvance={canAdvance(survey.questions[step.index])}
-          isLast={step.index === totalQuestions - 1}
-          stepLabel={`${step.index + 1} / ${totalQuestions}`}
+          isLast={step.index === totalQuestions - 1 || (() => {
+            const jumpTarget = resolveJumpTarget(survey.questions[step.index].logic, answers);
+            if (!jumpTarget) return false;
+            return survey.questions.findIndex((q) => q.id === jumpTarget) >= totalQuestions;
+          })()}
           error={error}
         />
       )}
@@ -242,7 +420,6 @@ function QuestionStep({
   onNext,
   canAdvance,
   isLast,
-  stepLabel,
   error,
 }: {
   question: FormbricksQuestion;
@@ -252,15 +429,13 @@ function QuestionStep({
   onNext: () => void;
   canAdvance: boolean;
   isLast: boolean;
-  stepLabel: string;
   error: string;
 }) {
   const value = answers[question.id];
 
   return (
     <div>
-      <p className="text-sm text-text-muted/60">{stepLabel}</p>
-      <h2 className="mt-2 font-display text-2xl tracking-tight sm:text-3xl">
+      <h2 className="font-display text-2xl tracking-tight sm:text-3xl">
         {question.headline.default}
       </h2>
       {question.subheader?.default && (

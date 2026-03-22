@@ -8,7 +8,9 @@ type Props = {
   onSkip?: () => void;
   headline?: string;
   subtext?: string;
-  intro?: string;
+  introHtml?: string;
+  introHeadline?: string;
+  logoUrl?: string;
 };
 
 export default function EmailCapture({
@@ -17,17 +19,35 @@ export default function EmailCapture({
   onSkip,
   headline = "Share your email to stay in the loop",
   subtext = "We'll only send launch updates. No spam.",
-  intro,
+  introHtml,
+  introHeadline,
+  logoUrl,
 }: Props) {
   const [email, setEmail] = useState(initialEmail);
 
   return (
     <div className="text-center">
-      {intro && (
-        <p className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-text-muted">
-          {intro}
-        </p>
+      {logoUrl && (
+        <img
+          src={logoUrl}
+          alt=""
+          className="mx-auto mb-6 h-16 w-auto"
+        />
       )}
+
+      {introHeadline && (
+        <h1 className="mb-4 font-display text-3xl tracking-tight sm:text-4xl">
+          {introHeadline}
+        </h1>
+      )}
+
+      {introHtml && (
+        <div
+          className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-text-muted [&_p]:mb-2 [&_p:last-child]:mb-0"
+          dangerouslySetInnerHTML={{ __html: introHtml }}
+        />
+      )}
+
       <h2 className="font-display text-2xl tracking-tight sm:text-3xl">
         {headline}
       </h2>
