@@ -39,6 +39,7 @@ Thumbs.db
 # --- Claude Code ---
 # Note: .claude/ is kept in git for the internal repo, but excluded from public repo sync
 # .claude/*
+.mcp.json
 
 # --- Backups / Archives ---
 *.zip
