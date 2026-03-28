@@ -1,68 +1,72 @@
 # Simulation Rules
 
-Dieses Dokument beschreibt die Vereinfachungen und Regeln für die Monte-Carlo Combat-Simulation.
+This document describes the simplifications and rules for Arcanalyse's Monte Carlo combat simulation.
 
-## Ziel der Simulation
+**Note:** The simulation engine is planned for development in later phases. This document describes the intended design, not a current implementation.
 
-Die Simulation soll tausende Kämpfe durchspielen und dabei messen:
-- **Win Rate:** Wie oft gewinnt die Party?
-- **TPK Rate:** Wie oft stirbt die gesamte Party?
-- **Expected Rounds:** Durchschnittliche Kampfdauer
-- **Variance:** Wie "swingy" ist der Kampf?
+## Goal of the Simulation
 
-## Vereinfachungen (MVP)
+The simulation runs thousands of combats and measures:
+- **Win Rate:** How often does the party win?
+- **TPK Rate:** How often does the entire party die?
+- **Expected Rounds:** Average combat duration
+- **Variance:** How "swingy" is the combat?
 
-D&D 5e hat zu viele Regeln für eine vollständige Simulation. Diese Vereinfachungen machen die Simulation tractable:
+## Simplifications (MVP)
 
-### 1. Positioning: Ignoriert
+D&D 5e has too many rules for a complete simulation. These simplifications keep the simulation tractable:
 
-- **Realität:** Grid-basiertes Movement, Opportunity Attacks, Cover
-- **Simulation:** Alle Combatants können alle Targets erreichen
-- **Auswirkung:** AoE trifft immer optimale Anzahl Targets
+### 1. Positioning: Zone-based
 
-### 2. Tactics: Einfache Heuristiken
+- **Reality:** Grid-based movement, opportunity attacks, cover
+- **Simulation:** Zone-based system (melee range, ranged range, far) instead of full grid
+- **Impact:** AoE targeting uses zone-based estimates rather than exact positioning
 
-**Monster-Targeting:**
+### 2. Tactics: Behavioral Presets
+
+**Monster targeting:**
 ```python
 def select_target(attacker, enemies):
-    # Priorität: Lowest HP first (focus fire)
+    # Priority: Lowest HP first (focus fire)
     return min(enemies, key=lambda e: e.current_hp)
 ```
 
-**Spell-Auswahl:**
+**Action selection:**
 ```python
 def select_action(creature, context):
-    # Vereinfacht: Nutze beste verfügbare Action
-    # Später: Smarter AI mit Situation-Awareness
+    # Simplified: Use best available action
+    # Later: Smarter AI with situation awareness
     if creature.can_use_aoe and len(context.enemies) >= 3:
         return creature.best_aoe_action
     return creature.best_single_target_action
 ```
 
-### 3. Concentration: Vereinfacht
+Four tactical AI presets are planned: mindless, predator, tactical, and intelligent.
 
-- Concentration-Spells werden getrackt
-- Bei Damage: CON Save (DC 10 oder Damage/2)
-- Bei Fail: Spell endet
-- **Vereinfachung:** Keine strategische Concentration-Breaking
+### 3. Concentration: Simplified
 
-### 4. Healing: Reaktiv
+- Concentration spells are tracked
+- On damage: CON save (DC 10 or damage/2)
+- On failure: Spell ends
+- **Simplification:** No strategic concentration breaking
+
+### 4. Healing: Reactive
 
 ```python
 def should_heal(healer, ally):
-    # Heal wenn Ally unter 25% HP
+    # Heal when ally is below 25% HP
     return ally.current_hp < ally.max_hp * 0.25
 ```
 
-### 5. Legendary Actions: Am Turn-Ende
+### 5. Legendary Actions: End of Round
 
-- Monster mit LA nutzen alle 3 am Ende jeder Runde
-- **Vereinfachung:** Optimale Verteilung statt strategisches Timing
+- Monsters with LA use all 3 at the end of each round
+- **Simplification:** Optimal distribution rather than strategic timing
 
 ### 6. Lair Actions: Initiative 20
 
-- Lair Actions feuern automatisch auf Initiative 20
-- Effekt wird auf zufälliges Party-Member angewendet
+- Lair actions fire automatically on initiative 20
+- Effect is applied to a random party member
 
 ---
 
@@ -102,12 +106,12 @@ def simulate_round(state):
             if state.is_over:
                 break
 
-    # Legendary Actions (für Monster mit LA)
+    # Legendary actions (for monsters with LA)
     for monster in state.monsters_with_la:
         if monster.is_alive:
             state = execute_legendary_actions(monster, state)
 
-    # Lair Actions
+    # Lair actions
     if state.has_lair_actions:
         state = execute_lair_action(state)
 
@@ -182,7 +186,7 @@ def roll_damage(damage_spec, critical=False):
     return max(0, total)
 
 def parse_dice(dice_str):
-    """Parse "2d6+3" into (2, 6, 3)"""
+    """Parse '2d6+3' into (2, 6, 3)"""
     # Implementation...
     pass
 ```
@@ -204,23 +208,23 @@ def apply_damage(target, damage, damage_type):
 
 ---
 
-## Death & Unconscious
+## Death and Unconscious
 
 ### Monster Death
 ```python
 if monster.current_hp <= 0:
     monster.is_alive = False
-    # Entfernen aus Initiative
+    # Remove from initiative
 ```
 
-### Player Character Death (Vereinfacht für MVP)
+### Player Character Death (Simplified for MVP)
 
 ```python
 if character.current_hp <= 0:
     character.is_unconscious = True
     character.death_saves = {"successes": 0, "failures": 0}
 
-# Death Saves (am Start des Turns wenn unconscious)
+# Death saves (at the start of turn when unconscious)
 def roll_death_save(character):
     roll = random.randint(1, 20)
 
@@ -280,11 +284,11 @@ def aggregate_results(results):
 
 ---
 
-## Zukünftige Verbesserungen
+## Planned Improvements
 
-1. **Smarter AI:** Taktische Entscheidungen (Focus Healer, Save CC for right moment)
-2. **Positioning:** Simplified Grid (Front/Back Line)
-3. **Resource Management:** Spell Slots, Abilities per Rest
-4. **Morale/Retreat:** Monster fliehen bei X% HP
+1. **Smarter AI:** Tactical decisions (focus healer, save CC for the right moment)
+2. **Positioning:** Zone-based movement (melee/ranged/far) with opportunity attack triggers
+3. **Resource management:** Spell slots, abilities per rest
+4. **Morale/Retreat:** Monsters flee at X% HP
 
-Diese kommen nach MVP, wenn die Basis-Simulation validiert ist.
+These improvements are planned for later phases, after the base simulation is validated.

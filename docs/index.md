@@ -1,44 +1,46 @@
 # Arcanalyse
 
-**D&D 5e Encounter & Combat Balancing Tool**
+**D&D 5e Encounter Difficulty Analysis Tool**
 
-## Vision
+## What is Arcanalyse?
 
-Arcanalyse hilft Dungeon Masters dabei, Kämpfe realistischer einzuschätzen als mit den statischen CR/XP-Heuristiken des DMG. Das Ziel ist präzise Schwierigkeitsvorhersagen durch fortgeschrittene Analyse und Simulation.
+Arcanalyse is a web tool for D&D 5e Dungeon Masters that evaluates encounter difficulty through Monte Carlo combat simulation, replacing the notoriously unreliable Challenge Rating (CR) system. Instead of guessing whether an encounter is balanced, DMs get actual win rates, TPK probabilities, and risk flags based on thousands of simulated combats.
 
-## Kernprobleme die wir lösen
+## The Problem
 
-1. **CR ist unzuverlässig** - Ein CR 5 Monster kann trivial oder tödlich sein, je nach Party-Zusammensetzung
-2. **Action Economy wird ignoriert** - 4 Goblins sind gefährlicher als 1 Ogre gleicher XP
-3. **Swingy Encounters** - Manche Kämpfe kippen durch einen Crit oder Failed Save
-4. **Keine Risiko-Transparenz** - DMs wissen nicht, wie wahrscheinlich ein TPK ist
+The CR system from the Dungeon Master's Guide has well-known shortcomings:
 
-## Zielgruppen
+1. **CR is unreliable** -- A CR 5 monster can be trivial or lethal depending on party composition
+2. **Action economy is ignored** -- 4 goblins are more dangerous than 1 ogre at the same XP
+3. **Swingy encounters** -- Some fights swing on a single crit or failed save
+4. **No risk transparency** -- DMs have no idea how likely a TPK actually is
 
-| Gruppe | Nutzung |
-|--------|---------|
-| **Dungeon Masters** (primär) | Encounter-Design, Balancing, Vorab-Check |
-| **Power-User / Spielgruppen** | Party-Planung, "Was wäre wenn"-Szenarien |
-| **VTT-User** (später) | Foundry/Roll20 Integration |
+## The Solution
 
-## MVP-Scope
+Arcanalyse addresses these problems with a dual approach:
 
-1. **Encounter Builder** - Party + Gegner definieren und speichern
-2. **Schwierigkeitsanalyse** - CR/XP + erweiterte Metriken + Risk Flags
-3. **Monte-Carlo Simulation** - Winrate, TPK-Wahrscheinlichkeit, Varianz
+- **Heuristic analysis** -- Instant difficulty ratings using DPR analysis, action economy index, and risk flags
+- **Monte Carlo simulation** -- Run thousands of combats to get statistical outcomes: win rate, TPK probability, expected rounds, and variance
 
-## Projektstruktur
+## Tech Stack
 
-```
-arcanalyse-api      → FastAPI Backend (REST API)
-├── arcanalyse-core → Domain-Logik, Analyse-Engine, Simulation
-├── arcanalyse-db   → SQLModel + PostgreSQL, Persistence
-└── arcanalyse-training → Erweiterte Analyse-Pipeline
-```
+| Layer | Technology |
+|-------|------------|
+| Backend | Python 3.12, FastAPI |
+| Domain logic | arcanalyse-core (pure Python, zero dependencies) |
+| Database | PostgreSQL 16, SQLModel, Alembic |
+| Frontend | Next.js, TypeScript, Tailwind CSS v4 |
+| Hosting | Hetzner AX41, Docker, Caddy |
 
-## Weiterführende Dokumentation
+## Project Status
 
-- [Architektur-Übersicht](architecture/overview.md)
-- [Datenmodell](architecture/data-model.md)
-- [D&D Combat-Mechaniken](domain/combat-mechanics.md)
-- [Entwickler-Setup](dev/setup.md)
+Arcanalyse is in early development. The landing page and infrastructure are live; backend implementation is in progress.
+
+## Documentation
+
+- [Architecture Overview](architecture/overview.md)
+- [Data Model](architecture/data-model.md)
+- [D&D Combat Mechanics](domain/combat-mechanics.md)
+- [Difficulty Metrics](domain/difficulty-metrics.md)
+- [Simulation Rules](domain/simulation-rules.md)
+- [Developer Setup](dev/setup.md)

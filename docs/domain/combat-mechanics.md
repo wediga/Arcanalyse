@@ -1,34 +1,34 @@
-# D&D 5e Combat-Mechaniken
+# D&D 5e Combat Mechanics
 
-Dieses Dokument beschreibt die D&D 5e Regeln, die für Arcanalyse relevant sind.
+This document describes the D&D 5e rules relevant to Arcanalyse's encounter analysis and simulation.
 
-## Grundlegende Combat-Struktur
+## Basic Combat Structure
 
-### Initiative & Runden
+### Initiative and Rounds
 
-1. Jede Kreatur würfelt **Initiative** (d20 + DEX Modifier)
-2. Reihenfolge: Höchste Initiative zuerst
-3. Jede Runde: Jede Kreatur hat **1 Turn**
-4. Turn besteht aus: **Action**, **Bonus Action**, **Movement**, **Reaction** (1x bis zum nächsten Turn)
+1. Each creature rolls **initiative** (d20 + DEX modifier)
+2. Order: Highest initiative goes first
+3. Each round: Every creature gets **1 turn**
+4. A turn consists of: **Action**, **Bonus Action**, **Movement**, **Reaction** (1 until next turn)
 
 ### Action Economy
 
-| Ressource | Pro Turn | Beispiele |
-|-----------|----------|-----------|
+| Resource | Per Turn | Examples |
+|----------|----------|----------|
 | Action | 1 | Attack, Cast Spell, Dash, Dodge |
-| Bonus Action | 1 | Offhand Attack, einige Spells |
+| Bonus Action | 1 | Offhand Attack, some spells |
 | Movement | Speed ft. | Walk, Fly, Swim |
-| Reaction | 1 (bis nächster Turn) | Opportunity Attack, Shield |
-| Free Action | Beliebig | Drop Item, Speak |
+| Reaction | 1 (until next turn) | Opportunity Attack, Shield |
+| Free Action | Unlimited | Drop Item, Speak |
 
-**Warum Action Economy wichtig ist:**
-- 4 Goblins (4 Actions) > 1 Ogre (1 Action) bei gleicher XP
-- Legendary Actions umgehen das 1-Action-Limit
-- Lair Actions geben zusätzliche Aktionen
+**Why action economy matters:**
+- 4 goblins (4 actions) > 1 ogre (1 action) at the same XP
+- Legendary actions bypass the 1-action limit
+- Lair actions provide additional actions
 
 ---
 
-## Angriffe & Damage
+## Attacks and Damage
 
 ### Attack Roll
 
@@ -37,8 +37,8 @@ d20 + Attack Bonus vs. AC
 ```
 
 - **Hit:** Roll >= AC
-- **Critical Hit:** Natural 20 → Double Damage Dice
-- **Critical Miss:** Natural 1 → Auto-Miss
+- **Critical Hit:** Natural 20 -- double damage dice
+- **Critical Miss:** Natural 1 -- automatic miss
 
 ### Damage Roll
 
@@ -46,31 +46,31 @@ d20 + Attack Bonus vs. AC
 Damage Dice + Modifier
 ```
 
-Beispiel: Greatsword = 2d6 + STR Modifier
+Example: Greatsword = 2d6 + STR modifier
 
 ### Damage Types (13)
 
-| Type | Häufig bei |
-|------|------------|
-| Bludgeoning | Clubs, Fists, Falls |
-| Piercing | Arrows, Spears, Bites |
-| Slashing | Swords, Claws |
-| Fire | Fireball, Dragons |
-| Cold | Cone of Cold, Ice |
+| Type | Common Sources |
+|------|----------------|
+| Bludgeoning | Clubs, fists, falls |
+| Piercing | Arrows, spears, bites |
+| Slashing | Swords, claws |
+| Fire | Fireball, dragons |
+| Cold | Cone of Cold, ice |
 | Lightning | Shocking Grasp |
 | Thunder | Thunderwave |
-| Acid | Black Dragon, Spells |
+| Acid | Black Dragon, spells |
 | Poison | Snakes, Poison Spray |
 | Necrotic | Undead, Vampiric Touch |
-| Radiant | Divine Smite, Angels |
+| Radiant | Divine Smite, angels |
 | Force | Magic Missile, Eldritch Blast |
 | Psychic | Mind Flayers |
 
-### Resistances & Immunities
+### Resistances and Immunities
 
-- **Resistance:** Half Damage (rounded down)
-- **Immunity:** No Damage
-- **Vulnerability:** Double Damage
+- **Resistance:** Half damage (rounded down)
+- **Immunity:** No damage
+- **Vulnerability:** Double damage
 
 ---
 
@@ -80,10 +80,10 @@ Beispiel: Greatsword = 2d6 + STR Modifier
 d20 + Save Modifier vs. DC
 ```
 
-### Save-Typen
+### Save Types
 
-| Save | Typische Effekte |
-|------|------------------|
+| Save | Typical Effects |
+|------|-----------------|
 | STR | Grapple, Shove, Push |
 | DEX | Fireball, Lightning, AoE |
 | CON | Poison, Disease, Concentration |
@@ -91,41 +91,41 @@ d20 + Save Modifier vs. DC
 | WIS | Charm, Fear, Mind Control |
 | CHA | Banishment, Possession |
 
-### DC-Erfolg
+### Save Success
 
-- **"half":** Halber Damage bei Erfolg
-- **"none":** Kein Effekt bei Erfolg
-- **Partial:** Reduzierter Effekt (spell-spezifisch)
+- **"half":** Half damage on success
+- **"none":** No effect on success
+- **Partial:** Reduced effect (spell-specific)
 
 ---
 
 ## Conditions (15)
 
-| Condition | Combat-Effekt |
+| Condition | Combat Effect |
 |-----------|---------------|
-| **Blinded** | Disadvantage on Attacks, Attacks gegen dich haben Advantage |
-| **Charmed** | Kann Charmer nicht angreifen, Charmer hat Advantage auf Social Checks |
-| **Frightened** | Disadvantage on Checks/Attacks wenn Quelle sichtbar, kann sich nicht nähern |
+| **Blinded** | Disadvantage on attacks; attacks against you have advantage |
+| **Charmed** | Cannot attack the charmer; charmer has advantage on social checks |
+| **Frightened** | Disadvantage on checks/attacks while source is visible; cannot move closer |
 | **Grappled** | Speed = 0 |
-| **Incapacitated** | Keine Actions oder Reactions |
-| **Paralyzed** | Incapacitated + Auto-Fail STR/DEX Saves + Attacks haben Advantage + Crits in 5ft |
-| **Petrified** | Incapacitated + Resistance to all + Immune to Poison/Disease |
-| **Poisoned** | Disadvantage on Attacks und Ability Checks |
-| **Prone** | Melee Attacks haben Advantage, Ranged haben Disadvantage |
-| **Restrained** | Speed = 0, Disadvantage on DEX Saves, Attacks gegen dich haben Advantage |
-| **Stunned** | Incapacitated + Auto-Fail STR/DEX Saves + Attacks haben Advantage |
-| **Unconscious** | Incapacitated + Drop Items + Prone + Auto-Fail STR/DEX + Auto-Crit in 5ft |
-| **Exhaustion** | 6 Stufen, kumulativ (Level 6 = Tod) |
-| **Invisible** | Advantage on Attacks, Attacks gegen dich haben Disadvantage |
-| **Deafened** | Kann nicht hören |
+| **Incapacitated** | No actions or reactions |
+| **Paralyzed** | Incapacitated + auto-fail STR/DEX saves + attacks have advantage + crits within 5 ft |
+| **Petrified** | Incapacitated + resistance to all + immune to poison/disease |
+| **Poisoned** | Disadvantage on attacks and ability checks |
+| **Prone** | Melee attacks have advantage; ranged attacks have disadvantage |
+| **Restrained** | Speed = 0; disadvantage on DEX saves; attacks against you have advantage |
+| **Stunned** | Incapacitated + auto-fail STR/DEX saves + attacks have advantage |
+| **Unconscious** | Incapacitated + drop items + prone + auto-fail STR/DEX + auto-crit within 5 ft |
+| **Exhaustion** | 6 levels, cumulative (level 6 = death) |
+| **Invisible** | Advantage on attacks; attacks against you have disadvantage |
+| **Deafened** | Cannot hear |
 
-### "Hard CC" für Analyse
+### "Hard CC" for Analysis
 
-Besonders gefährliche Conditions (für Risk Flags):
-- **Paralyzed** - Auto-Crits
-- **Stunned** - Verlust von Action + Vulnerability
-- **Unconscious** - Wie Paralyzed + Prone
-- **Incapacitated** - Kein Handeln möglich
+Particularly dangerous conditions (flagged as risk indicators):
+- **Paralyzed** -- auto-crits
+- **Stunned** -- loss of action + vulnerability
+- **Unconscious** -- like paralyzed + prone
+- **Incapacitated** -- no actions possible
 
 ---
 
@@ -144,9 +144,9 @@ Besonders gefährliche Conditions (für Risk Flags):
 
 ### Concentration
 
-- Nur **1 Concentration-Spell** gleichzeitig aktiv
-- Bei Damage: CON Save (DC = 10 oder Half Damage, höherer Wert)
-- Bei Fail: Spell endet
+- Only **1 concentration spell** active at a time
+- On taking damage: CON save (DC = 10 or half damage, whichever is higher)
+- On failure: Spell ends
 
 ---
 
@@ -154,21 +154,21 @@ Besonders gefährliche Conditions (für Risk Flags):
 
 ### Legendary Actions (LA)
 
-- 3 LA pro Runde (typisch)
-- Verwendet am Ende eines anderen Creature's Turn
-- Regenerieren am Start des eigenen Turns
+- 3 LA per round (typical)
+- Used at the end of another creature's turn
+- Regenerate at the start of the creature's own turn
 
 ### Legendary Resistance (LR)
 
-- 3 LR pro Tag (typisch)
-- Kann failed Save automatisch in Success verwandeln
-- **Kritisch für Analyse:** LR macht CC unzuverlässig
+- 3 LR per day (typical)
+- Can turn a failed save into an automatic success
+- **Critical for analysis:** LR makes crowd control unreliable
 
 ### Lair Actions
 
-- Initiative Count 20 (loses ties)
-- Zusätzliche Effekte im Lair
-- Meist Environmental/Control
+- Initiative count 20 (loses ties)
+- Additional effects within the lair
+- Mostly environmental/control effects
 
 ---
 
@@ -208,28 +208,28 @@ Besonders gefährliche Conditions (für Risk Flags):
 | 11-14 | x3 |
 | 15+ | x4 |
 
-**Problem mit CR:** Ignoriert Synergien, Abilities, Party-Zusammensetzung.
+**The problem with CR:** It ignores synergies, abilities, and party composition.
 
 ---
 
-## Für Arcanalyse relevante Metriken
+## Metrics Relevant to Arcanalyse
 
-### Offensive Metriken
+### Offensive Metrics
 
-- **DPR (Damage per Round):** Erwarteter Damage pro Runde
-- **Nova Damage:** Maximaler Burst in einer Runde
-- **To-Hit vs. AC:** Trefferwahrscheinlichkeit
-- **AoE Potential:** Wie viele Targets gleichzeitig?
+- **DPR (Damage per Round):** Expected damage per round
+- **Nova Damage:** Maximum burst in a single round
+- **To-Hit vs. AC:** Hit probability
+- **AoE Potential:** How many targets simultaneously?
 
-### Defensive Metriken
+### Defensive Metrics
 
-- **Effective HP:** HP adjusted für Resistances/AC
-- **Save Proficiencies:** Welche Saves sind stark?
-- **Condition Immunities:** Immun gegen wichtige CC?
+- **Effective HP:** HP adjusted for resistances/AC
+- **Save Proficiencies:** Which saves are strong?
+- **Condition Immunities:** Immune to important CC?
 
 ### Risk Flags
 
-- **One-Shot Potential:** Kann Damage > Party-Member HP?
-- **Hard CC:** Paralysis, Stun, Unconscious?
+- **One-Shot Potential:** Can damage exceed a party member's HP?
+- **Hard CC:** Paralysis, stun, unconscious?
 - **TPK Spells:** Power Word Kill, Disintegrate?
-- **Action Economy Imbalance:** Viel mehr/weniger Actions als Party?
+- **Action Economy Imbalance:** Significantly more/fewer actions than the party?

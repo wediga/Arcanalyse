@@ -1,86 +1,109 @@
-# Architektur-Übersicht
+# Architecture Overview
 
-## Package-Struktur
+## Workspace Structure
+
+Arcanalyse uses a [uv](https://docs.astral.sh/uv/) workspace monorepo with four Python packages and a separate frontend application.
 
 ```
 arcanalyse/
-├── src/arcanalyse_api/        # FastAPI Application
+├── src/arcanalyse_api/        # FastAPI application
 ├── packages/
-│   ├── arcanalyse-core/       # Domain Logic (pure Python)
-│   ├── arcanalyse-db/         # Persistence Layer
-│   └── arcanalyse-training/   # ML Pipeline (isolated)
-├── frontend/                  # Next.js Frontend + Landing Page
-├── docs/
-└── pyproject.toml             # Workspace Root
+│   ├── arcanalyse-core/       # Domain logic (pure Python)
+│   ├── arcanalyse-db/         # Persistence layer
+│   └── arcanalyse-training/   # Analysis pipeline (isolated)
+├── frontend/                  # Next.js frontend
+├── docs/                      # Public documentation
+└── pyproject.toml             # Workspace root
 ```
 
-## Abhängigkeiten
+## Package Dependencies
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
-│ arcanalyse-api  │────▶│ arcanalyse-db   │
+│ arcanalyse-api  │────>│ arcanalyse-db   │
 └────────┬────────┘     └────────┬────────┘
          │                       │
-         │              ┌────────▼────────┐
-         └─────────────▶│ arcanalyse-core │
+         │              ┌────────v────────┐
+         └─────────────>│ arcanalyse-core │
                         └─────────────────┘
 
 ┌───────────────────────┐
-│ arcanalyse-training   │──▶ core + db (isoliertes venv)
+│ arcanalyse-training   │──> core + db (isolated venv)
 └───────────────────────┘
 ```
 
-## Package-Verantwortlichkeiten
+**Key constraint:** `arcanalyse-core` has zero external dependencies. It contains only pure Python domain logic and can be used by any consumer without pulling in framework dependencies.
+
+## Package Responsibilities
 
 ### arcanalyse-core
 
-**Zweck:** Framework-agnostische Domain-Logik
+**Purpose:** Framework-agnostic domain logic
 
-- Pydantic-Models für Domain-Typen (Monster, Spell, Character, Encounter)
-- Validierungsregeln
-- Analyse-Engine (CR/XP, Action Economy, Risk Flags)
-- Simulation-Engine (Monte-Carlo)
-- Keine I/O, keine DB, keine HTTP
+- Pydantic models for domain types (Monster, Spell, Character, Encounter)
+- Validation rules
+- Analysis engine (CR/XP, action economy, risk flags)
+- Simulation engine (Monte Carlo combat)
+- No I/O, no database, no HTTP
 
 ### arcanalyse-db
 
-**Zweck:** Persistence Layer
+**Purpose:** Persistence layer
 
-- SQLModel-Tabellen (DB-Schema)
-- Alembic Migrations
-- Repository-Pattern für Datenzugriff
-- Hängt von `arcanalyse-core` ab (nutzt Domain-Typen)
+- SQLModel table definitions (database schema)
+- Alembic migrations
+- Repository pattern for data access
+- Depends on `arcanalyse-core` (uses domain types)
 
 ### arcanalyse-api
 
-**Zweck:** HTTP-Interface
+**Purpose:** HTTP interface
 
-- FastAPI Application
-- REST-Endpoints
-- Request/Response DTOs
-- Auth (später)
-- Hängt von `core` und `db` ab
+- FastAPI application
+- REST endpoints
+- Request/response DTOs
+- Authentication (planned)
+- Depends on `core` and `db`
 
 ### arcanalyse-training
 
-**Zweck:** ML-Pipeline (separat)
+**Purpose:** Analysis pipeline (separate)
 
-- Training-Skripte
-- Feature-Engineering
-- Model-Evaluation
-- Läuft in isoliertem `.venv-training`
-- Darf NICHT von `api` abhängen
+- Training scripts
+- Feature engineering
+- Model evaluation
+- Runs in an isolated `.venv-training` environment
+- Must NOT depend on `api`
+
+## Frontend
+
+The frontend is a Next.js application with TypeScript and Tailwind CSS v4.
+
+- Located in `frontend/`
+- Uses Turbopack as the bundler
+- Currently serves the landing page and survey system
+- Will include the encounter builder, results screen, and monster browser
 
 ## Environments
 
-| Environment | Zweck | Aktivierung |
-|-------------|-------|-------------|
-| `.venv` | API-Entwicklung | `uv sync` |
-| `.venv-training` | ML-Training | `UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training` |
+| Environment | Purpose | Activation |
+|-------------|---------|------------|
+| `.venv` | API development | `uv sync` |
+| `.venv-training` | Analysis pipeline | `UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training` |
 
-## Externe Datenquellen
+## Infrastructure
 
-- **5e-database** (SRD): https://github.com/5e-bits/5e-database
-  - JSON-Format, REST API unter dnd5eapi.co
-  - Wird für initialen Monster/Spell-Import genutzt
-  - Design-Entscheidung: Vollständige Statblocks ab Tag 1 (kein Lazy-Loading oder Stub-Ansatz)
+- **Server:** Hetzner AX41
+- **Containerization:** Docker + Docker Compose
+- **Reverse proxy:** Caddy
+- **Database:** PostgreSQL 16 (port 5432 production, port 5433 local dev)
+- **Analytics:** Umami (self-hosted)
+- **Newsletter:** Listmonk + Brevo SMTP (self-hosted)
+- **Surveys:** Formbricks (self-hosted)
+
+## External Data Sources
+
+- **Open5e v2** (SRD): Structured D&D 5e data for monsters, spells, and classes
+  - Used for initial SRD data import (~400 monsters, top 30 spells)
+  - Design decision: Full statblock depth from day one (no lazy-loading or stub approach)
+  - Primary keys use UUID v7 (time-sortable, no sequence bottleneck)

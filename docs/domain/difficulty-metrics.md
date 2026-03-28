@@ -1,14 +1,16 @@
-# Schwierigkeits-Metriken
+# Difficulty Metrics
 
-Dieses Dokument beschreibt die Metriken, die Arcanalyse zur Schwierigkeitsbewertung verwendet.
+This document describes the metrics Arcanalyse will use for encounter difficulty assessment.
 
-## Baseline: DMG-Methode (CR/XP)
+**Note:** These metrics are part of the planned heuristic and simulation layers. They describe the intended approach, not a current implementation.
 
-### Berechnung
+## Baseline: DMG Method (CR/XP)
 
-1. XP aller Monster summieren
-2. Encounter Multiplier anwenden (basierend auf Anzahl)
-3. Mit Party-Thresholds vergleichen
+### Calculation
+
+1. Sum XP of all monsters
+2. Apply encounter multiplier (based on monster count)
+3. Compare against party thresholds
 
 ```python
 def calculate_dmg_difficulty(monsters, party_size, party_level):
@@ -31,7 +33,7 @@ def calculate_dmg_difficulty(monsters, party_size, party_level):
 
     adjusted_xp = total_xp * multiplier
 
-    # Vergleich mit Thresholds
+    # Compare against thresholds
     thresholds = get_thresholds(party_level) * party_size
 
     if adjusted_xp < thresholds.easy:
@@ -46,16 +48,16 @@ def calculate_dmg_difficulty(monsters, party_size, party_level):
         return "Deadly"
 ```
 
-### Probleme mit DMG-Methode
+### Problems with the DMG Method
 
-1. **Ignoriert Monster-Abilities** - Ein CR 5 mit Paralyze ≠ CR 5 ohne
-2. **Ignoriert Party-Composition** - 4 Martials vs. 4 Casters spielen anders
-3. **Ignoriert Synergien** - Monster, die sich verstärken
-4. **"Deadly" ist nicht "TPK"** - Deadly kann 0 oder 3 Tode bedeuten
+1. **Ignores monster abilities** -- A CR 5 with Paralyze is not equal to a CR 5 without
+2. **Ignores party composition** -- 4 martials vs. 4 casters play differently
+3. **Ignores synergies** -- Monsters that buff each other
+4. **"Deadly" does not mean "TPK"** -- Deadly can mean 0 or 3 deaths
 
 ---
 
-## Erweiterte Metriken
+## Extended Metrics
 
 ### 1. Action Economy Index
 
@@ -65,23 +67,23 @@ AE_Index = (Monster_Actions + LA + Lair) / Party_Actions
 
 | Index | Interpretation |
 |-------|----------------|
-| < 0.5 | Party dominiert, trivial |
-| 0.5 - 0.8 | Party-Vorteil |
-| 0.8 - 1.2 | Ausgeglichen |
-| 1.2 - 1.5 | Monster-Vorteil |
-| > 1.5 | Monster dominieren, gefährlich |
+| < 0.5 | Party dominates, trivial |
+| 0.5 - 0.8 | Party advantage |
+| 0.8 - 1.2 | Balanced |
+| 1.2 - 1.5 | Monster advantage |
+| > 1.5 | Monsters dominate, dangerous |
 
-**Beispiel:**
-- Party: 4 Players → 4 Actions
-- 1 Adult Dragon: 1 Action + 3 LA = 4 effective Actions
-- AE_Index = 4/4 = 1.0 (ausgeglichen)
+**Example:**
+- Party: 4 players -- 4 actions
+- 1 Adult Dragon: 1 action + 3 LA = 4 effective actions
+- AE_Index = 4/4 = 1.0 (balanced)
 
-### 2. Damage per Round (DPR) Analyse
+### 2. Damage per Round (DPR) Analysis
 
 ```python
 def calculate_monster_dpr(monster, target_ac):
     """
-    Berechne erwarteten Damage pro Runde.
+    Calculate expected damage per round.
     """
     total_dpr = 0
 
@@ -96,35 +98,35 @@ def calculate_monster_dpr(monster, target_ac):
     return total_dpr
 ```
 
-**DPR-basierte Metriken:**
+**DPR-based metrics:**
 
-| Metrik | Formel | Bedeutung |
-|--------|--------|-----------|
-| Rounds to Kill Party | Party_Total_HP / Monster_DPR | Wie lange hält Party? |
-| Rounds to Kill Monsters | Monster_Total_HP / Party_DPR | Wie lange dauert Sieg? |
-| DPR Ratio | Party_DPR / Monster_DPR | Wer dealt mehr? |
+| Metric | Formula | Meaning |
+|--------|---------|---------|
+| Rounds to Kill Party | Party_Total_HP / Monster_DPR | How long does the party survive? |
+| Rounds to Kill Monsters | Monster_Total_HP / Party_DPR | How long until victory? |
+| DPR Ratio | Party_DPR / Monster_DPR | Who deals more damage? |
 
 ### 3. Effective HP
 
 ```python
 def calculate_effective_hp(creature, attacker_damage_types):
     """
-    HP adjusted für Resistances gegen erwartete Damage-Typen.
+    HP adjusted for resistances against expected damage types.
     """
     ehp = creature.hp
 
     for damage_type in attacker_damage_types:
         if damage_type in creature.immunities:
-            # Effektiv unendlich HP gegen diesen Typ
+            # Effectively infinite HP against this type
             continue
         elif damage_type in creature.resistances:
-            # Doppelte HP gegen diesen Typ
+            # Double HP against this type
             ehp *= 1.5  # Approximation
         elif damage_type in creature.vulnerabilities:
             ehp *= 0.75  # Approximation
 
-    # AC-Adjustment (höhere AC = mehr effective HP)
-    ac_factor = creature.ac / 15  # 15 als Baseline
+    # AC adjustment (higher AC = more effective HP)
+    ac_factor = creature.ac / 15  # 15 as baseline
     ehp *= ac_factor
 
     return ehp
@@ -132,14 +134,14 @@ def calculate_effective_hp(creature, attacker_damage_types):
 
 ### 4. Save Profile Match
 
-Wie gut matchen Party-Save-DCs mit Monster-Saves?
+How well do party save DCs match against monster saves?
 
 ```python
 def analyze_save_matchup(party, monsters):
     """
-    Analysiere ob Party-Spells gegen Monster-Saves effektiv sind.
+    Analyze whether party spells are effective against monster saves.
     """
-    party_save_dcs = extract_party_save_dcs(party)  # z.B. {"wis": 15, "dex": 14}
+    party_save_dcs = extract_party_save_dcs(party)  # e.g., {"wis": 15, "dex": 14}
 
     results = {}
     for save_type, dc in party_save_dcs.items():
@@ -155,14 +157,14 @@ def analyze_save_matchup(party, monsters):
 
 ## Risk Flags
 
-Binäre Warnungen für gefährliche Situationen.
+Binary warnings for dangerous situations.
 
 ### One-Shot Potential
 
 ```python
 def check_oneshot_potential(monsters, party):
     """
-    Kann ein Monster einen Party-Member in einem Hit töten?
+    Can a monster kill a party member in a single hit?
     """
     min_party_hp = min(member.hp for member in party)
 
@@ -181,12 +183,12 @@ HARD_CC_CONDITIONS = {"paralyzed", "stunned", "unconscious", "petrified"}
 
 def check_hard_cc(monsters):
     """
-    Haben Monster Hard CC Abilities?
+    Do monsters have hard crowd control abilities?
     """
     for monster in monsters:
         for ability in monster.actions + monster.special_abilities:
             if any(cc in ability.description.lower() for cc in HARD_CC_CONDITIONS):
-                # Prüfe ob es einen Save gibt
+                # Check if there is a save
                 if ability.dc:
                     return True, ability
 
@@ -198,7 +200,7 @@ def check_hard_cc(monsters):
 ```python
 def check_aoe_spike(monsters, party_size):
     """
-    Kann ein AoE signifikanten Damage an mehrere Targets machen?
+    Can an AoE deal significant damage to multiple targets?
     """
     for monster in monsters:
         for action in monster.actions:
@@ -217,12 +219,12 @@ def check_aoe_spike(monsters, party_size):
 ```python
 def check_legendary_resistance(monsters, party):
     """
-    Warnung wenn Monster LR haben und Party CC-heavy ist.
+    Warning when monsters have LR and the party is CC-heavy.
     """
     lr_monsters = [m for m in monsters if m.legendary_resistances > 0]
 
     if lr_monsters and party_relies_on_save_spells(party):
-        return True, f"{len(lr_monsters)} Monster mit Legendary Resistance"
+        return True, f"{len(lr_monsters)} monster(s) with Legendary Resistance"
 
     return False, None
 ```
@@ -231,17 +233,17 @@ def check_legendary_resistance(monsters, party):
 
 ## Composite Difficulty Score
 
-Kombiniert alle Metriken zu einem Score.
+Combines all metrics into a single score.
 
 ```python
 def calculate_difficulty_score(encounter):
     """
-    0-100 Score, wobei:
+    0-100 score where:
     - 0-20: Trivial
     - 20-40: Easy
     - 40-60: Medium
     - 60-80: Hard
-    - 80-100: Deadly/TPK-Risk
+    - 80-100: Deadly/TPK risk
     """
     scores = {
         "dmg_difficulty": map_dmg_to_score(encounter.dmg_difficulty),
@@ -250,7 +252,7 @@ def calculate_difficulty_score(encounter):
         "risk_flags": count_risk_flags(encounter) * 10,
     }
 
-    # Gewichtung
+    # Weights
     weights = {
         "dmg_difficulty": 0.2,
         "action_economy": 0.25,
@@ -263,26 +265,26 @@ def calculate_difficulty_score(encounter):
 
 ---
 
-## Simulation-basierte Metriken
+## Simulation-based Metrics
 
-Wenn Monte-Carlo-Simulation verfügbar:
+When Monte Carlo simulation is available:
 
-| Metrik | Beschreibung |
-|--------|--------------|
-| **Party Win Rate** | % der Simulationen mit Party-Sieg |
-| **TPK Rate** | % der Simulationen mit Total Party Kill |
-| **Expected Rounds** | Durchschnittliche Kampfdauer |
-| **Variance / Swinginess** | Standardabweichung der Outcomes |
-| **Expected Casualties** | Durchschnittliche Tode pro Kampf |
+| Metric | Description |
+|--------|-------------|
+| **Party Win Rate** | % of simulations with party victory |
+| **TPK Rate** | % of simulations with Total Party Kill |
+| **Expected Rounds** | Average combat duration |
+| **Variance / Swinginess** | Standard deviation of outcomes |
+| **Expected Casualties** | Average deaths per combat |
 
-Diese Metriken sind präziser als Heuristiken, aber rechenintensiver.
+These metrics are more precise than heuristics but more computationally expensive.
 
 ---
 
-## Offene Fragen
+## Open Questions
 
-1. **Gewichtung der Metriken** - Wie stark zählt Action Economy vs. DPR?
-2. **Party-Modeling** - Wie detailliert muss Party sein für gute Vorhersagen?
-3. **Simulation Simplifications** - Welche Regeln können wir vereinfachen?
+1. **Metric weighting** -- How much does action economy count vs. DPR?
+2. **Party modeling** -- How detailed must the party be for good predictions?
+3. **Simulation simplifications** -- Which rules can be simplified?
 
-→ Werden iterativ durch Testing und User-Feedback beantwortet.
+These will be answered iteratively through testing and user feedback.

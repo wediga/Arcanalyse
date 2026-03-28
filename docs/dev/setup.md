@@ -1,24 +1,24 @@
-# Entwickler-Setup
+# Developer Setup
 
-## Voraussetzungen
+## Prerequisites
 
 - **Python:** 3.12 (via `.python-version`)
-- **Node.js:** 22+ (für Frontend)
-- **uv:** Package Manager ([Installation](https://docs.astral.sh/uv/getting-started/installation/))
-- **Docker:** Für PostgreSQL
-- **IDE:** PyCharm (empfohlen)
+- **Node.js:** 18+ (for frontend)
+- **uv:** Package manager ([installation](https://docs.astral.sh/uv/getting-started/installation/))
+- **Docker:** For PostgreSQL
+- **IDE:** PyCharm (recommended)
 
-## Projekt klonen & Setup
+## Clone and Setup
 
 ```bash
-# Repository klonen
+# Clone the repository
 git clone <repo-url>
 cd Arcanalyse
 
-# Dependencies installieren (default environment)
+# Install dependencies (default environment)
 uv sync
 
-# Prüfen ob alles funktioniert
+# Verify the setup
 uv run python --version
 ```
 
@@ -26,28 +26,28 @@ uv run python --version
 
 ### Default Environment (`.venv`)
 
-Für API-Entwicklung und allgemeine Arbeit.
+For API development and general work.
 
 ```bash
-# Sync
+# Sync dependencies
 uv sync
 
-# Command ausführen
+# Run a command
 uv run <command>
 
-# Beispiel: Tests
+# Example: run tests
 uv run pytest
 ```
 
 ### Training Environment (`.venv-training`)
 
-Isoliert für ML-Training, um Konflikte zu vermeiden.
+Isolated environment for the analysis pipeline to avoid dependency conflicts.
 
 ```bash
-# Erstellen/Sync
+# Create/sync
 UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training
 
-# Command ausführen
+# Run a command
 UV_PROJECT_ENVIRONMENT=.venv-training uv run --package arcanalyse-training <command>
 ```
 
@@ -55,33 +55,35 @@ UV_PROJECT_ENVIRONMENT=.venv-training uv run --package arcanalyse-training <comm
 <summary>PowerShell (Windows)</summary>
 
 ```powershell
-# Erstellen/Sync
+# Create/sync
 $env:UV_PROJECT_ENVIRONMENT = ".venv-training"
 uv sync --package arcanalyse-training
 Remove-Item Env:\UV_PROJECT_ENVIRONMENT
 
-# Command ausführen
+# Run a command
 $env:UV_PROJECT_ENVIRONMENT = ".venv-training"
 uv run --package arcanalyse-training <command>
 Remove-Item Env:\UV_PROJECT_ENVIRONMENT
 ```
 </details>
 
-## Datenbank (PostgreSQL)
+## Database (PostgreSQL)
 
-### Option A: Docker (empfohlen)
+### Option A: Docker (recommended)
 
 ```bash
 docker compose up -d
 
-# Prüfen ob Container läuft
+# Verify the container is running
 docker ps
 ```
 
-### Option B: Lokale PostgreSQL Installation
+This starts a PostgreSQL 16 container on port 5433.
 
-1. PostgreSQL 16 installieren
-2. Datenbank erstellen:
+### Option B: Local PostgreSQL Installation
+
+1. Install PostgreSQL 16
+2. Create the database:
    ```sql
    CREATE DATABASE arcanalyse;
    CREATE USER arcanalyse WITH PASSWORD 'arcanalyse';
@@ -90,91 +92,99 @@ docker ps
 
 ### Environment Variables
 
-Erstelle `.env` im Projekt-Root (wird nicht committed):
+Create `.env` in the project root (not committed to Git):
 
 ```env
 DATABASE_URL_TEST=postgresql://arcanalyse:arcanalyse@localhost:5433/arcanalyse_test
 ```
 
-## Projekt-Struktur
+## Project Structure
 
 ```
 Arcanalyse/
 ├── src/
-│   └── arcanalyse_api/      # FastAPI Application
+│   └── arcanalyse_api/      # FastAPI application
 ├── packages/
-│   ├── arcanalyse-core/     # Domain Logic
+│   ├── arcanalyse-core/     # Domain logic
 │   │   └── src/arcanalyse_core/
 │   ├── arcanalyse-db/       # Persistence
 │   │   └── src/arcanalyse_db/
-│   └── arcanalyse-training/ # ML (isoliert)
+│   └── arcanalyse-training/ # Analysis pipeline (isolated)
 │       └── src/arcanalyse_training/
-├── frontend/                # Next.js Frontend + Landing Page
-├── docs/                    # Dokumentation
-├── .env                     # Lokale Config (nicht committed)
-├── .env.example             # Template für .env
-├── pyproject.toml           # Workspace Root
+├── frontend/                # Next.js frontend
+├── docs/                    # Documentation
+├── .env                     # Local config (not committed)
+├── .env.example             # Template for .env
+├── pyproject.toml           # Workspace root
 └── uv.lock                  # Lockfile (committed)
 ```
 
-## Typische Workflows
+## Common Workflows
 
-### Dependency hinzufügen
+### Adding a Dependency
 
 ```bash
-# Zu Root (arcanalyse-api)
+# To root project (arcanalyse-api)
 uv add fastapi
 
-# Zu einem Package
+# To a workspace package
 cd packages/arcanalyse-core
 uv add pydantic
 cd ../..
 ```
 
-### API starten (sobald implementiert)
+### Starting the API (once implemented)
 
 ```bash
 uv run uvicorn arcanalyse_api:app --reload
 ```
 
-### Tests ausführen
+### Running Tests
 
 ```bash
 uv run pytest
 ```
 
-## IDE-Setup (PyCharm)
+### Frontend Development
 
-1. **Python Interpreter:** `.venv/bin/python` auswählen (Windows: `.venv/Scripts/python.exe`)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## IDE Setup (PyCharm)
+
+1. **Python interpreter:** Select `.venv/bin/python` (Windows: `.venv/Scripts/python.exe`)
 2. **Mark as Sources Root:**
    - `src/`
    - `packages/arcanalyse-core/src/`
    - `packages/arcanalyse-db/src/`
    - `packages/arcanalyse-training/src/`
-3. **pytest als Test Runner** konfigurieren
+3. **Configure pytest** as the test runner
 
 ## Troubleshooting
 
-### "Module not found" bei Imports
+### "Module not found" on Imports
 
 ```bash
-# Sync neu ausführen
+# Re-sync dependencies
 uv sync
 
-# Prüfen ob Package installiert
+# Check if the package is installed
 uv run pip list | grep arcanalyse
 ```
 
 ### PostgreSQL Connection Error
 
-1. Docker läuft? `docker ps`
-2. Port 5433 frei? `ss -tlnp | grep 5433` (Linux) / `netstat -an | Select-String 5433` (Windows)
-3. `.env` korrekt?
+1. Is Docker running? `docker ps`
+2. Is port 5433 available? `ss -tlnp | grep 5433` (Linux) / `netstat -an | Select-String 5433` (Windows)
+3. Is `.env` configured correctly?
 
-### Training Environment Probleme
+### Training Environment Issues
 
 ```bash
-# Komplett neu erstellen
+# Recreate from scratch
 rm -rf .venv-training
 UV_PROJECT_ENVIRONMENT=.venv-training uv sync --package arcanalyse-training
 ```
